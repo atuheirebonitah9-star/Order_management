@@ -1,0 +1,31 @@
+<!-- orders/templates/orders/restaurant_list.html -->
+{% extends 'orders/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Restaurants</h1>
+
+<div class="row">
+    {% for restaurant in restaurants %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ restaurant.name }}</h5>
+                <p class="card-text">
+                    <strong>Cuisine:</strong> {{ restaurant.cuisine_type|default:"-" }}<br>
+                    <strong>Address:</strong> {{ restaurant.address }}<br>
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if restaurant.is_open %}success{% else %}danger{% endif %}">
+                        {% if restaurant.is_open %}Open{% else %}Closed{% endif %}
+                    </span><br>
+                    <strong>Rating:</strong> ⭐ {{ restaurant.rating|default:"0" }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No restaurants found</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

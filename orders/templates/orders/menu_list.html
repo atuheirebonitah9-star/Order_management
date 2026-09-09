@@ -1,0 +1,31 @@
+<!-- orders/templates/orders/menu_list.html -->
+{% extends 'orders/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Menu Items</h1>
+
+<div class="row">
+    {% for item in menu_items %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ item.name }}</h5>
+                <p class="card-text">
+                    <strong>Restaurant:</strong> {{ item.restaurant.name }}<br>
+                    <strong>Category:</strong> {{ item.category|default:"-" }}<br>
+                    <strong>Price:</strong> UGX {{ item.price|floatformat:0 }}<br>
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if item.is_available %}success{% else %}danger{% endif %}">
+                        {% if item.is_available %}Available{% else %}Unavailable{% endif %}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No menu items found</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
