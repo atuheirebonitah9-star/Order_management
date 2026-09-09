@@ -1,0 +1,33 @@
+<!-- orders/templates/orders/rider_list.html -->
+{% extends 'orders/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Delivery Riders</h1>
+
+<div class="row">
+    {% for rider in riders %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ rider.name }}</h5>
+                <p class="card-text">
+                    <strong>Phone:</strong> {{ rider.phone }}<br>
+                    <strong>Vehicle:</strong> {{ rider.vehicle_type }}<br>
+                    <strong>Plate:</strong> {{ rider.vehicle_plate }}<br>
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if rider.status == 'available' %}success{% elif rider.status == 'busy' %}warning{% else %}secondary{% endif %}">
+                        {{ rider.get_status_display }}
+                    </span><br>
+                    <strong>Rating:</strong> ⭐ {{ rider.rating|default:"0" }}<br>
+                    <strong>Deliveries:</strong> {{ rider.total_deliveries }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No riders found</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
