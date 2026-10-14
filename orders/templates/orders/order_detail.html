@@ -1,99 +1,87 @@
-<!-- orders/templates/orders/dashboard.html -->
+<!-- orders/templates/orders/order_detail.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Order {{ order.order_id }} - OrderHub{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">Dashboard</h1>
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Order #{{ order.order_id }}</h1>
+        <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Total Orders</h5>
-                <h2>{{ total_orders|default:"0" }}</h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">Order Information</div>
+                <div class="card-body">
+                    <p><strong>Placed:</strong> {{ order.placed_at|date:"M d, Y H:i" }}</p>
+                    <p>
+                        <strong>Status:</strong>
+                        <span class="badge badge-status badge-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Delivery:</strong> {{ order.delivery_status|title }}</p>
+                    <p><strong>Delivery address:</strong> {{ order.delivery_address }}</p>
+                    <p><strong>Restaurant:</strong> {{ order.restaurant.name }}</p>
+                    <p>
+                        <strong>Rider:</strong>
+                        {% if order.rider %}
+                            {{ order.rider.name }}
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Pending</h5>
-                <h2>{{ pending_orders|default:"0" }}</h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Delivered Today</h5>
-                <h2>{{ today_orders|default:"0" }}</h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Available Riders</h5>
-                <h2>{{ available_riders|default:"0" }}</h2>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-clock"></i> Recent Orders
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">Customer</div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ order.customer.customer_name }}</p>
+                    <p><strong>Email:</strong> {{ order.customer.email_address }}</p>
+                    <p><strong>Phone:</strong> {{ order.customer.phone_contact }}</p>
+                </div>
             </div>
-            <div class="card-body">
-                <table class="table">
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Items</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
                     <thead>
                         <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Status</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for order in recent_orders %}
+                        {% for item in order.orderitem_set.all %}
                         <tr>
-                            <td><a href="/orders/{{ order.order_id }}/">{{ order.order_id }}</a></td>
-                            <td>{{ order.customer.name }}</td>
-                            <td>{{ order.get_status_display }}</td>
+                            <td>{{ item.menu_item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>UGX {{ item.unit_price|floatformat:0 }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="3">No recent orders</td></tr>
+                        <tr>
+                            <td colspan="3" class="text-center py-4">No items on this order</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-crown"></i> Top Customers
-            </div>
-            <div class="card-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Orders</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for customer in top_customers %}
-                        <tr>
-                            <td>{{ customer.name }}</td>
-                            <td>{{ customer.order_count }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="2">No customers yet</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-footer text-end">
+            <p class="mb-1">Subtotal: UGX {{ subtotal|floatformat:0 }}</p>
+            <p class="mb-0"><strong>Total: UGX {{ order.total|floatformat:0 }}</strong></p>
         </div>
     </div>
 </div>

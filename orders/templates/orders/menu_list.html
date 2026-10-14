@@ -4,6 +4,30 @@
 {% block content %}
 <h1 class="mb-4">Menu Items</h1>
 
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <select name="restaurant" class="form-select">
+            <option value="">All Restaurants</option>
+            {% for r in restaurants %}
+            <option value="{{ r.pk }}" {% if selected_restaurant == r.pk|stringformat:"s" %}selected{% endif %}>
+                {{ r.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            {% for c in categories %}
+            <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+</form>
+
 <div class="row">
     {% for item in menu_items %}
     <div class="col-md-4 mb-3">
@@ -14,7 +38,7 @@
                     <strong>Restaurant:</strong> {{ item.restaurant.name }}<br>
                     <strong>Category:</strong> {{ item.category|default:"-" }}<br>
                     <strong>Price:</strong> UGX {{ item.price|floatformat:0 }}<br>
-                    <strong>Status:</strong> 
+                    <strong>Status:</strong>
                     <span class="badge bg-{% if item.is_available %}success{% else %}danger{% endif %}">
                         {% if item.is_available %}Available{% else %}Unavailable{% endif %}
                     </span>

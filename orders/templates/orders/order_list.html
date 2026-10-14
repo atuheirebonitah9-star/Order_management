@@ -21,7 +21,7 @@
                 <div class="col-md-4">
                     <div class="search-bar">
                         <input type="text" name="search" class="form-control" 
-                               placeholder="Search orders..." value="{{ search_query }}">
+                               placeholder="Search orders..." value="{{ search_query|default:'' }}">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -53,7 +53,7 @@
                             <th>Restaurant</th>
                             <th>Rider</th>
                             <th>Status</th>
-                            <th>Payment</th>
+                            <th>Delivery</th>
                             <th>Total</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -63,7 +63,7 @@
                         {% for order in orders %}
                         <tr>
                             <td><strong>#{{ order.order_id }}</strong></td>
-                            <td>{{ order.customer.name }}</td>
+                            <td>{{ order.customer.customer_name }}</td>
                             <td>{{ order.restaurant.name }}</td>
                             <td>
                                 {% if order.rider %}
@@ -78,8 +78,8 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge badge-status {% if order.payment_status == 'paid' %}badge-delivered{% else %}badge-pending{% endif %}">
-                                    {{ order.get_payment_status_display }}
+                                <span class="badge badge-status {% if order.delivery_status == 'delivered' %}badge-delivered{% else %}badge-pending{% endif %}">
+                                    {{ order.delivery_status|title }}
                                 </span>
                             </td>
                             <td>UGX {{ order.total|floatformat:0 }}</td>
