@@ -15,17 +15,20 @@ def dashboard(request):
     # Statistics
     total_orders = Order.objects.count()
     pending_orders = Order.objects.filter(status='pending').count()
-    delivered_orders = Order.objects.filter(status='delivered').count()
+    # FIX: delivery is now tracked in delivery_status, not status
+    delivered_orders = Order.objects.filter(delivery_status='delivered').count()
     today_orders = Order.objects.filter(placed_at__gte=start_of_day).count()
     
-    total_customers = Customer.objects.filter(is_active=True).count()
+    # FIX: Customer no longer has is_active
+    total_customers = Customer.objects.count()
     total_restaurants = Restaurant.objects.filter(is_open=True).count()
     available_riders = DeliveryRider.objects.filter(status='available').count()
     
     # Revenue
-    total_revenue = Order.objects.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0
+    # FIX: 'delivered' is no longer an order status, use 'completed'
+    total_revenue = Order.objects.filter(status='completed').aggregate(Sum('total'))['total__sum'] or 0
     today_revenue = Order.objects.filter(
-        status='delivered',
+        status='completed',
         placed_at__gte=start_of_day
     ).aggregate(Sum('total'))['total__sum'] or 0
     
@@ -52,10 +55,11 @@ def dashboard(request):
     ).filter(order_count__gt=0).order_by('-order_count')[:10]
     
     # Recent delivery activity
+    # FIX: actual_delivery_time no longer exists, order by placed_at instead
     recent_deliveries = Order.objects.filter(
         rider__isnull=False,
-        status='delivered'
-    ).select_related('rider', 'customer').order_by('-actual_delivery_time')[:5]
+        delivery_status='delivered'
+    ).select_related('rider', 'customer').order_by('-placed_at')[:5]
     
     context = {
         'total_orders': total_orders,
@@ -89,22 +93,21 @@ def order_list(request):
         orders = orders.filter(status=status_filter)
     
     # Search
+    # FIX: customer__name -> customer__customer_name
     search_query = request.GET.get('search')
     if search_query:
         orders = orders.filter(
-            Q(customer__name__icontains=search_query) |
+            Q(customer__customer_name__icontains=search_query) |
             Q(restaurant__name__icontains=search_query) |
             Q(delivery_address__icontains=search_query)
         )
     
     # Order statuses for filter dropdown
+    # FIX: matches Order.ORDER_STATUS in models.py (data dictionary version)
     statuses = [
         ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
         ('preparing', 'Preparing'),
-        ('ready', 'Ready'),
-        ('delivering', 'Delivering'),
-        ('delivered', 'Delivered'),
+        ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
     
@@ -120,6 +123,7 @@ def order_list(request):
 def order_detail(request, order_id):
     """Display order details"""
     
+    # order_id is now a CHAR(8) string, matches <str:order_id> in urls.py
     order = get_object_or_404(
         Order.objects.select_related(
             'customer', 'restaurant', 'rider'
@@ -142,14 +146,16 @@ def order_detail(request, order_id):
 def customer_list(request):
     """Display all customers"""
     
-    customers = Customer.objects.filter(is_active=True).all().order_by('name')
+    # FIX: removed is_active filter, name -> customer_name
+    customers = Customer.objects.all().order_by('customer_name')
     
+    # FIX: name -> customer_name, email -> email_address, city removed
     search_query = request.GET.get('search')
     if search_query:
         customers = customers.filter(
-            Q(name__icontains=search_query) |
-            Q(email__icontains=search_query) |
-            Q(city__icontains=search_query)
+            Q(customer_name__icontains=search_query) |
+            Q(email_address__icontains=search_query) |
+            Q(phone_contact__icontains=search_query)
         )
     
     context = {
@@ -164,11 +170,11 @@ def restaurant_list(request):
     
     restaurants = Restaurant.objects.all().order_by('name')
     
+    # FIX: cuisine_type removed
     search_query = request.GET.get('search')
     if search_query:
         restaurants = restaurants.filter(
-            Q(name__icontains=search_query) |
-            Q(cuisine_type__icontains=search_query)
+            Q(name__icontains=search_query)
         )
     
     context = {
@@ -181,7 +187,8 @@ def restaurant_list(request):
 def rider_list(request):
     """Display all delivery riders"""
     
-    riders = DeliveryRider.objects.filter(is_active=True).all().order_by('name')
+    # FIX: removed is_active filter
+    riders = DeliveryRider.objects.all().order_by('name')
     
     status_filter = request.GET.get('status')
     if status_filter:
