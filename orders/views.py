@@ -146,7 +146,10 @@ def order_detail(request, order_id):
 def customer_list(request):
     """Display all customers"""
     
+<<<<<<< HEAD
     # FIX: removed is_active filter, name -> customer_name
+=======
+>>>>>>> origin/main
     customers = Customer.objects.all().order_by('customer_name')
     
     # FIX: name -> customer_name, email -> email_address, city removed
@@ -154,8 +157,12 @@ def customer_list(request):
     if search_query:
         customers = customers.filter(
             Q(customer_name__icontains=search_query) |
+<<<<<<< HEAD
             Q(email_address__icontains=search_query) |
             Q(phone_contact__icontains=search_query)
+=======
+            Q(email_address__icontains=search_query) 
+>>>>>>> origin/main
         )
     
     context = {
@@ -235,6 +242,7 @@ def menu_list(request):
         'categories': categories,
         'selected_restaurant': restaurant_filter,
         'selected_category': category_filter,
+
     }
     
     return render(request, 'orders/menu_list.html', context)
