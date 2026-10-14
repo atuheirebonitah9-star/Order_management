@@ -78,8 +78,8 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {% if order.delivery_status == 'delivered' %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ order.delivery_status|cut:"_"|title }}
+                                <span class="badge {% if order.delivery_status == 'delivered' %}bg-success{% elif order.delivery_status == 'in_transit' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ order.get_delivery_status_display }}
                                 </span>
                             </td>
                             <td>UGX {{ order.total|floatformat:0 }}</td>
