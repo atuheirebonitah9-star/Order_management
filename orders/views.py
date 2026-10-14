@@ -166,10 +166,7 @@ def restaurant_list(request):
     
     search_query = request.GET.get('search')
     if search_query:
-        restaurants = restaurants.filter(
-            Q(name__icontains=search_query) |
-            Q(cuisine_type__icontains=search_query)
-        )
+        restaurants = restaurants.filter(name__icontains= search_query)
     
     context = {
         'restaurants': restaurants,
