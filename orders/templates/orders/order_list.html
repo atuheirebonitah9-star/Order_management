@@ -13,14 +13,14 @@
             </span>
         </div>
     </div>
-    
+
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-4">
                     <div class="search-bar">
-                        <input type="text" name="search" class="form-control" 
+                        <input type="text" name="search" class="form-control"
                                placeholder="Search orders..." value="{{ search_query|default:'' }}">
                     </div>
                 </div>
@@ -40,7 +40,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Orders Table -->
     <div class="card">
         <div class="card-body p-0">
@@ -85,7 +85,7 @@
                             <td>UGX {{ order.total|floatformat:0 }}</td>
                             <td>{{ order.placed_at|date:"M d, Y H:i" }}</td>
                             <td>
-                                <a href="{% url 'order_detail' order.order_id %}" 
+                                <a href="{% url 'orders:order_detail' order.order_id %}"
                                    class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i>
                                 </a>

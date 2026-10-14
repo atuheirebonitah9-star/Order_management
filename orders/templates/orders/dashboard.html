@@ -57,7 +57,7 @@
                     <tbody>
                         {% for order in recent_orders %}
                         <tr>
-                            <td><a href="{% url 'order_detail' order.order_id %}">{{ order.order_id }}</a></td>
+                            <td><a href="{% url 'orders:order_detail' order.order_id %}">{{ order.order_id }}</a></td>
                             <td>{{ order.customer.customer_name }}</td>
                             <td>{{ order.get_status_display }}</td>
                         </tr>
