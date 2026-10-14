@@ -24,8 +24,8 @@
     <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
             <div class="card-body">
-                <h5 class="card-title">Delivered Today</h5>
-                <h2>{{ today_orders|default:"0" }}</h2>
+                <h5 class="card-title">Delivered</h5>
+                <h2>{{ delivered_orders|default:"0" }}</h2>
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
                     <tbody>
                         {% for order in recent_orders %}
                         <tr>
-                            <td><a href="/orders/{{ order.order_id }}/">{{ order.order_id }}</a></td>
+                            <td><a href="{% url 'orders:order_detail' order.order_id %}">{{ order.order_id }}</a></td>
                             <td>{{ order.customer.customer_name }}</td>
                             <td>{{ order.get_status_display }}</td>
                         </tr>

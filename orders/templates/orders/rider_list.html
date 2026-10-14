@@ -4,6 +4,17 @@
 {% block content %}
 <h1 class="mb-4">Delivery Riders</h1>
 
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            {% for s in statuses %}
+            <option value="{{ s.0 }}" {% if current_status == s.0 %}selected{% endif %}>{{ s.1 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
 <div class="row">
     {% for rider in riders %}
     <div class="col-md-4 mb-3">
@@ -11,15 +22,12 @@
             <div class="card-body">
                 <h5 class="card-title">{{ rider.name }}</h5>
                 <p class="card-text">
-                    <strong>Phone:</strong> {{ rider.phone }}<br>
-                    <strong>Vehicle:</strong> {{ rider.vehicle_type }}<br>
-                    <strong>Plate:</strong> {{ rider.vehicle_plate }}<br>
-                    <strong>Status:</strong> 
+                    <strong>ID:</strong> {{ rider.rider_id }}<br>
+                    <strong>Status:</strong>
                     <span class="badge bg-{% if rider.status == 'available' %}success{% elif rider.status == 'busy' %}warning{% else %}secondary{% endif %}">
                         {{ rider.get_status_display }}
                     </span><br>
-                    <strong>Rating:</strong> ⭐ {{ rider.rating|default:"0" }}<br>
-                    <strong>Deliveries:</strong> {{ rider.total_deliveries }}
+                    <strong>Rating:</strong> ⭐ {{ rider.rating }}
                 </p>
             </div>
         </div>
