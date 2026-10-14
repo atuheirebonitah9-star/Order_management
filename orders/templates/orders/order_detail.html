@@ -20,11 +20,11 @@
                     <p><strong>Placed:</strong> {{ order.placed_at|date:"M d, Y H:i" }}</p>
                     <p>
                         <strong>Status:</strong>
-                        <span class="badge badge-status badge-{{ order.status }}">
+                        <span class="badge {% if order.status == 'pending' %}bg-warning text-dark{% elif order.status == 'preparing' %}bg-info text-dark{% elif order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
                             {{ order.get_status_display }}
                         </span>
                     </p>
-                    <p><strong>Delivery:</strong> {{ order.delivery_status|title }}</p>
+                    <p><strong>Delivery:</strong> {{ order.delivery_status|cut:"_"|title }}</p>
                     <p><strong>Delivery address:</strong> {{ order.delivery_address }}</p>
                     <p><strong>Restaurant:</strong> {{ order.restaurant.name }}</p>
                     <p>
