@@ -58,11 +58,13 @@
                         {% for order in recent_orders %}
                         <tr>
                             <td><a href="/orders/{{ order.order_id }}/">{{ order.order_id }}</a></td>
-                            <td>{{ order.customer.name }}</td>
+                            <td>{{ order.customer.customer_name }}</td>
                             <td>{{ order.get_status_display }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="3">No recent orders</td></tr>
+                        <tr>
+                            <td colspan="3">No recent orders</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -85,11 +87,13 @@
                     <tbody>
                         {% for customer in top_customers %}
                         <tr>
-                            <td>{{ customer.name }}</td>
+                            <td>{{ customer.customer_name }}</td>
                             <td>{{ customer.order_count }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="2">No customers yet</td></tr>
+                        <tr>
+                            <td colspan="2">No customers yet</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>

@@ -142,14 +142,13 @@ def order_detail(request, order_id):
 def customer_list(request):
     """Display all customers"""
     
-    customers = Customer.objects.filter(is_active=True).all().order_by('name')
+    customers = Customer.objects.all().order_by('customer_name')
     
     search_query = request.GET.get('search')
     if search_query:
         customers = customers.filter(
-            Q(name__icontains=search_query) |
-            Q(email__icontains=search_query) |
-            Q(city__icontains=search_query)
+            Q(customer_name__icontains=search_query) |
+            Q(email_address__icontains=search_query) 
         )
     
     context = {
@@ -228,6 +227,7 @@ def menu_list(request):
         'categories': categories,
         'selected_restaurant': restaurant_filter,
         'selected_category': category_filter,
+
     }
     
     return render(request, 'orders/menu_list.html', context)

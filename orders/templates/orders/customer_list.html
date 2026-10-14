@@ -10,22 +10,18 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>City</th>
-                    <th>Registered</th>
+                    <th>customer_name</th>
+                    <th>email_address</th>
+                    <th>phone_contact</th>
                 </tr>
             </thead>
             <tbody>
                 {% for customer in customers %}
                 <tr>
                     <td>{{ customer.customer_id }}</td>
-                    <td>{{ customer.name }}</td>
-                    <td>{{ customer.email }}</td>
-                    <td>{{ customer.phone }}</td>
-                    <td>{{ customer.city|default:"-" }}</td>
-                    <td>{{ customer.registration_date|date:"M d, Y" }}</td>
+                    <td>{{ customer.customer_name }}</td>
+                    <td>{{ customer.email_address }}</td>
+                    <td>{{ customer.phone_contact }}</td>
                 </tr>
                 {% empty %}
                 <tr>
