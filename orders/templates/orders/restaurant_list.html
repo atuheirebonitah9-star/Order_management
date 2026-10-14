@@ -11,13 +11,11 @@
             <div class="card-body">
                 <h5 class="card-title">{{ restaurant.name }}</h5>
                 <p class="card-text">
-                    <strong>Cuisine:</strong> {{ restaurant.cuisine_type|default:"-" }}<br>
                     <strong>Address:</strong> {{ restaurant.address }}<br>
                     <strong>Status:</strong> 
                     <span class="badge bg-{% if restaurant.is_open %}success{% else %}danger{% endif %}">
                         {% if restaurant.is_open %}Open{% else %}Closed{% endif %}
                     </span><br>
-                    <strong>Rating:</strong> ⭐ {{ restaurant.rating|default:"0" }}
                 </p>
             </div>
         </div>
