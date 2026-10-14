@@ -24,7 +24,7 @@
                             {{ order.get_status_display }}
                         </span>
                     </p>
-                    <p><strong>Delivery:</strong> {{ order.delivery_status|cut:"_"|title }}</p>
+                    <p><strong>Delivery:</strong> {{ order.get_delivery_status_display }}</p>
                     <p><strong>Delivery address:</strong> {{ order.delivery_address }}</p>
                     <p><strong>Restaurant:</strong> {{ order.restaurant.name }}</p>
                     <p>
