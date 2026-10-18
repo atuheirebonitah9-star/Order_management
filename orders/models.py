@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from .utils import generate_id
 
 
@@ -135,6 +137,10 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.menu_item.name} x{self.quantity}"
+        
+    @property
+    def get_subtotal(self):
+        return self.quantity * self.unit_price
 
 
 class Payment(models.Model):
@@ -187,3 +193,15 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review {self.review_id} for {self.order_id}"
+
+
+# ==========================================
+# AUTOMATIC TOTAL CALCULATION SIGNALS
+# ==========================================
+@receiver([post_save, post_delete], sender=OrderItem)
+def update_order_total(sender, instance, **kwargs):
+    """Recalculates the order total automatically whenever an item is added, updated, or deleted."""
+    order = instance.order
+    total = sum(item.get_subtotal for item in order.orderitem_set.all())
+    order.total = total
+    order.save()
