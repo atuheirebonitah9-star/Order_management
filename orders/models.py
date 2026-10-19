@@ -137,7 +137,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.menu_item.name} x{self.quantity}"
-        
+
     @property
     def get_subtotal(self):
         return self.quantity * self.unit_price
@@ -200,8 +200,11 @@ class Review(models.Model):
 # ==========================================
 @receiver([post_save, post_delete], sender=OrderItem)
 def update_order_total(sender, instance, **kwargs):
-    """Recalculates the order total automatically whenever an item is added, updated, or deleted."""
-    order = instance.order
-    total = sum(item.get_subtotal for item in order.orderitem_set.all())
-    order.total = total
-    order.save()
+    """Recalculates the order total whenever an item is added, updated, or deleted.
+
+    Queries the database fresh (ignoring any prefetched/cached items) and
+    updates only the total column, so it never overwrites other order fields.
+    """
+    items = OrderItem.objects.filter(order_id=instance.order_id)
+    total = sum(i.quantity * i.unit_price for i in items)
+    Order.objects.filter(pk=instance.order_id).update(total=total)
