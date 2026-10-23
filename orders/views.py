@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Count, Sum, Avg, Q
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Order, Customer, Restaurant, DeliveryRider, MenuItem, OrderItem
@@ -281,3 +282,40 @@ def menu_item_create(request):
     else:
         form = MenuItemForm()
     return render(request, 'orders/menu_item_form.html', {'form': form, 'title': 'Add Menu Item'})
+
+
+# ==========================================
+# REPORTS (staff only)
+# ==========================================
+@user_passes_test(lambda u: u.is_staff)
+def reports(request):
+    # Revenue counts completed orders only, matching the dashboard
+    revenue = Restaurant.objects.annotate(
+        revenue=Sum('order__total', filter=Q(order__status='completed')),
+        orders=Count('order')
+    ).order_by('-revenue')
+
+    by_status = Order.objects.values('status').annotate(n=Count('order_id')).order_by('status')
+
+    best_items = MenuItem.objects.annotate(
+        qty=Sum('orderitem__quantity')
+    ).filter(qty__gt=0).select_related('restaurant').order_by('-qty')[:10]
+
+    riders = DeliveryRider.objects.annotate(
+        total=Count('order'),
+        delivered=Count('order', filter=Q(order__delivery_status='delivered')),
+    ).order_by('-delivered')
+
+    context = {
+        'restaurant_chart': {
+            'labels': [r.name for r in revenue],
+            'values': [float(r.revenue or 0) for r in revenue],
+        },
+        'status_chart': {
+            'labels': [s['status'].title() for s in by_status],
+            'values': [s['n'] for s in by_status],
+        },
+        'best_items': best_items,
+        'riders': riders,
+    }
+    return render(request, 'orders/reports.html', context)
