@@ -16,17 +16,17 @@
 
 <section class="orders-status-overview menu-status-overview" aria-label="Menu item counts">
     <a class="orders-overview-card {% if not availability_filter %}selected{% endif %}" href="{% url 'orders:menu_list' %}">
-        <span class="orders-overview-icon overview-total"><i class="bi bi-journal-text"></i></span>
+        <span class="orders-overview-icon overview-total"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z" fill="currentColor" fill-opacity=".1"></path><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h8M12 3v13"></path><path d="M15 3v4h5" fill="currentColor" fill-opacity=".2"></path></svg></span>
         <span class="orders-overview-copy"><small>All items</small><strong>{{ menu_item_total }}</strong></span>
         <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
     </a>
     <a class="orders-overview-card {% if availability_filter == 'available' %}selected{% endif %}" href="{% url 'orders:menu_list' %}?availability=available">
-        <span class="orders-overview-icon overview-completed"><i class="bi bi-check2-circle"></i></span>
+        <span class="orders-overview-icon overview-completed"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".1"></circle><circle cx="12" cy="12" r="8.5"></circle><path d="m7.8 12.1 2.8 2.8 5.8-6" stroke-width="2.2"></path><path d="m18.3 4.5.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" fill="currentColor" stroke="none"></path></svg></span>
         <span class="orders-overview-copy"><small>Available</small><strong>{{ available_item_total }}</strong></span>
         <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
     </a>
     <a class="orders-overview-card {% if availability_filter == 'unavailable' %}selected{% endif %}" href="{% url 'orders:menu_list' %}?availability=unavailable">
-        <span class="orders-overview-icon overview-cancelled"><i class="bi bi-pause-circle"></i></span>
+        <span class="orders-overview-icon overview-cancelled"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="currentColor" fill-opacity=".1"></circle><circle cx="12" cy="12" r="8.5"></circle><path d="M9.5 9v6m5-6v6" stroke-width="2.1"></path></svg></span>
         <span class="orders-overview-copy"><small>Unavailable</small><strong>{{ unavailable_item_total }}</strong></span>
         <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
     </a>

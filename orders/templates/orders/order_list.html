@@ -16,13 +16,23 @@
 
 <section class="orders-status-overview" aria-label="Order counts by status">
     <a class="orders-overview-card {% if not current_status %}selected{% endif %}" href="{% url 'orders:order_list' %}">
-        <span class="orders-overview-icon overview-total"><i class="bi bi-receipt"></i></span>
+        <span class="orders-overview-icon overview-total"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17Z" fill="currentColor" fill-opacity=".12"></path><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17ZM9 8h6M9 12h6M9 16h3"></path><path d="M15 3.5v4h3" fill="currentColor" fill-opacity=".2"></path></svg></span>
         <span class="orders-overview-copy"><small>All orders</small><strong>{{ order_total }}</strong></span>
         <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
     </a>
     {% for status in status_overview %}
     <a class="orders-overview-card {% if current_status == status.value %}selected{% endif %}" href="{% url 'orders:order_list' %}?status={{ status.value }}">
-        <span class="orders-overview-icon overview-{{ status.value }}"><i class="{% if status.value == 'pending' %}bi bi-hourglass-split{% elif status.value == 'preparing' %}bi bi-fire{% elif status.value == 'completed' %}bi bi-check2-circle{% else %}bi bi-x-circle{% endif %}"></i></span>
+        <span class="orders-overview-icon overview-{{ status.value }}">
+            {% if status.value == 'pending' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12M6 20.5h12M7 4c0 4.4 5 4.4 5 8s-5 3.6-5 8m10-16c0 4.4-5 4.4-5 8s5 3.6 5 8"></path><path d="M8.5 6.5c.6 2 2.1 3.2 3.5 4.1 1.4-.9 2.9-2.1 3.5-4.1h-7Zm0 11c.6-2 2.1-3.2 3.5-4.1 1.4.9 2.9 2.1 3.5 4.1h-7Z" fill="currentColor" fill-opacity=".28" stroke="none"></path><path d="M12 10.5v3"></path></svg>
+            {% elif status.value == 'preparing' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c4.2 0 7-2.8 7-6.5 0-2.5-1.4-4.3-3.2-6.3.1 1.8-.8 2.8-1.8 3.3C14 7.6 12 4.8 8.5 3c.6 3.3-.3 5.2-1.8 7.2C5.5 11.9 5 13.3 5 14.7 5 18.5 7.8 21 12 21Z" fill="currentColor" fill-opacity=".14"></path><path d="M12 21c4.2 0 7-2.8 7-6.5 0-2.5-1.4-4.3-3.2-6.3.1 1.8-.8 2.8-1.8 3.3C14 7.6 12 4.8 8.5 3c.6 3.3-.3 5.2-1.8 7.2C5.5 11.9 5 13.3 5 14.7 5 18.5 7.8 21 12 21Z"></path><path d="M12 19c2 0 3.2-1.3 3.2-3 0-1.1-.6-2-1.6-3-.1 1-.7 1.6-1.6 2-1-1-1.5-1.8-1.4-3.1-1.2 1.1-1.8 2.3-1.8 3.6 0 2 1.2 3.5 3.2 3.5Z" fill="currentColor" fill-opacity=".25" stroke="none"></path></svg>
+            {% elif status.value == 'completed' %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="currentColor" fill-opacity=".1"></circle><circle cx="12" cy="12" r="8.5"></circle><path d="m7.8 12.1 2.8 2.8 5.8-6" stroke-width="2.2"></path><path d="m18.3 4.5.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" fill="currentColor" stroke="none"></path></svg>
+            {% else %}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="currentColor" fill-opacity=".1"></circle><circle cx="12" cy="12" r="8.5"></circle><path d="m9 9 6 6m0-6-6 6" stroke-width="2"></path></svg>
+            {% endif %}
+        </span>
         <span class="orders-overview-copy"><small>{{ status.label }}</small><strong>{{ status.count }}</strong></span>
         <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
     </a>

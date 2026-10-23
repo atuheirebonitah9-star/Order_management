@@ -16,15 +16,15 @@
 
 <section class="customers-overview" aria-label="Customer summary">
     <article class="customer-summary-card">
-        <span class="customer-summary-icon customer-summary-blue"><i class="bi bi-people"></i></span>
+        <span class="customer-summary-icon customer-summary-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3" fill="currentColor" fill-opacity=".18"></circle><circle cx="9" cy="7.5" r="2.5"></circle><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11Z" fill="currentColor" fill-opacity=".16"></path><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11ZM16.5 5.4a2.8 2.8 0 0 1 0 5.2m1.1 2.4a4 4 0 0 1 3 3.8v2.7h-3"></path></svg></span>
         <span><small>All customers</small><strong>{{ customer_total }}</strong></span>
     </article>
     <article class="customer-summary-card">
-        <span class="customer-summary-icon customer-summary-green"><i class="bi bi-person-check"></i></span>
+        <span class="customer-summary-icon customer-summary-green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3" fill="currentColor" fill-opacity=".18"></circle><circle cx="9" cy="7.5" r="2.5"></circle><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11Z" fill="currentColor" fill-opacity=".16"></path><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11Z"></path><circle cx="17.5" cy="15.5" r="4.2" fill="white" fill-opacity=".7"></circle><path d="m15.5 15.5 1.4 1.4 2.7-3"></path></svg></span>
         <span><small>Ordered before</small><strong>{{ customers_with_orders }}</strong></span>
     </article>
     <article class="customer-summary-card customer-summary-tip">
-        <span class="customer-summary-icon customer-summary-peach"><i class="bi bi-person-plus"></i></span>
+        <span class="customer-summary-icon customer-summary-peach"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3" fill="currentColor" fill-opacity=".18"></circle><circle cx="9" cy="7.5" r="2.5"></circle><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11Z" fill="currentColor" fill-opacity=".16"></path><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1h-11Z"></path><circle cx="18" cy="9" r="4.2" fill="white" fill-opacity=".72"></circle><path d="M18 6.8v4.4m-2.2-2.2h4.4"></path></svg></span>
         <span><small>Grow your customer list</small><strong>Add a customer</strong></span>
         <a href="{% url 'orders:customer_create' %}" aria-label="Add a customer"><i class="bi bi-arrow-up-right"></i></a>
     </article>

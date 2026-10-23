@@ -16,32 +16,34 @@
     <div class="app-shell">
         <aside class="app-sidebar" id="appSidebar" aria-label="Main navigation">
             <a class="brand" href="{% url 'orders:dashboard' %}" aria-label="OrderHub dashboard" title="OrderHub">
-                <span class="brand-icon"><i class="bi bi-box-seam"></i></span>
+                <span class="brand-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"></path><path d="m4.3 7.7 7.7 4.4 7.7-4.4M12 12v9"></path></svg>
+                </span>
                 <span>Order<span class="brand-light">Hub</span></span>
             </a>
             <div class="sidebar-label">WORKSPACE</div>
             <nav class="sidebar-nav">
                 <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'orders:dashboard' %}" aria-label="Dashboard" title="Dashboard">
-                    <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="7" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="7" height="6.5" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="6.5" rx="1.5"></rect></svg><span>Dashboard</span>
                 </a>
                 <a class="sidebar-link {% if 'order' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'orders:order_list' %}" aria-label="Orders" title="Orders">
-                    <i class="bi bi-receipt"></i><span>Orders</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17Z"></path><path d="M9 8h6M9 12h6M9 16h3"></path></svg><span>Orders</span>
                 </a>
                 <a class="sidebar-link {% if 'customer' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'orders:customer_list' %}" aria-label="Customers" title="Customers">
-                    <i class="bi bi-people"></i><span>Customers</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 20v-1.5a5.5 5.5 0 0 1 11 0V20h-11Z"></path><path d="M16 5.5a3 3 0 0 1 0 5.8m1.5 2.2a4 4 0 0 1 3 3.9V20h-3"></path></svg><span>Customers</span>
                 </a>
                 <a class="sidebar-link {% if 'restaurant' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'orders:restaurant_list' %}" aria-label="Restaurants" title="Restaurants">
-                    <i class="bi bi-shop"></i><span>Restaurants</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16l-1.2-5H5.2L4 10Z"></path><path d="M5.5 10v10h13V10M9 20v-6h6v6M3.5 10a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"></path></svg><span>Restaurants</span>
                 </a>
                 <a class="sidebar-link {% if 'rider' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'orders:rider_list' %}" aria-label="Riders" title="Riders">
-                    <i class="bi bi-bicycle"></i><span>Riders</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="3"></circle><circle cx="18" cy="17" r="3"></circle><path d="m6 17 4-7h4l4 7M9 10h3m2 0 2 3h3M10 10l3 7h5"></path></svg><span>Riders</span>
                 </a>
                 <a class="sidebar-link {% if 'menu' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'orders:menu_list' %}" aria-label="Menu" title="Menu">
-                    <i class="bi bi-journal-text"></i><span>Menu</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"></path><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h8"></path></svg><span>Menu</span>
                 </a>
                 {% if user.is_staff %}
                 <a class="sidebar-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'orders:reports' %}" aria-label="Reports" title="Reports">
-                    <i class="bi bi-bar-chart"></i><span>Reports</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-7m5 7V8M2.5 20.5h19"></path></svg><span>Reports</span>
                 </a>
                 {% endif %}
             </nav>
@@ -49,7 +51,7 @@
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button class="sidebar-link sidebar-logout" type="submit" aria-label="Log out" title="Log out">
-                        <i class="bi bi-box-arrow-left"></i><span>Log out</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10"></path><path d="M13 8l4 4-4 4m4-4H8"></path></svg><span>Log out</span>
                     </button>
                 </form>
             </div>
