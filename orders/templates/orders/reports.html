@@ -1,112 +1,245 @@
 {% extends 'orders/base.html' %}
 
+{% block title %}Reports{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i>Reports</h2>
-</div>
-
-<div class="row">
-    <div class="col-lg-7">
-        <div class="card p-4">
-            <h5 class="fw-semibold mb-3">Revenue per Restaurant</h5>
-            <div style="position: relative; height: 300px;">
-                <canvas id="restaurantChart"></canvas>
-            </div>
-        </div>
+<section class="reports-page-heading">
+    <div>
+        <p class="eyebrow">BUSINESS OVERVIEW</p>
+        <h1>Reports &amp; insights</h1>
+        <p class="reports-page-subtitle">Track order performance, restaurant revenue, and delivery operations.</p>
     </div>
-    <div class="col-lg-5">
-        <div class="card p-4">
-            <h5 class="fw-semibold mb-3">Orders by Status</h5>
-            <div style="position: relative; height: 300px;">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
+    <span class="reports-period"><i class="bi bi-calendar3"></i> {{ period_label }}</span>
+</section>
 
-<div class="row">
-    <div class="col-lg-6">
-        <div class="card p-4">
-            <h5 class="fw-semibold mb-3">Best-Selling Menu Items</h5>
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr><th>Item</th><th>Restaurant</th><th class="text-end">Qty Sold</th></tr>
-                </thead>
+<section class="reports-summary-grid" aria-label="Business summary">
+    <article class="reports-summary-card reports-summary-orange">
+        <div class="reports-summary-top"><span>Total orders</span><i class="bi bi-receipt"></i></div>
+        <strong>{{ total_orders|default:"0" }}</strong>
+        <small>Across all restaurants</small>
+    </article>
+    <article class="reports-summary-card reports-summary-lime">
+        <div class="reports-summary-top"><span>Completed revenue</span><i class="bi bi-currency-exchange"></i></div>
+        <strong>UGX {{ completed_revenue|default:"0"|floatformat:"0" }}</strong>
+        <small>From completed orders</small>
+    </article>
+    <article class="reports-summary-card reports-summary-lavender">
+        <div class="reports-summary-top"><span>Average order value</span><i class="bi bi-graph-up-arrow"></i></div>
+        <strong>UGX {{ average_order|default:"0"|floatformat:"0" }}</strong>
+        <small>Completed orders only</small>
+    </article>
+    <article class="reports-summary-card reports-summary-mint">
+        <div class="reports-summary-top"><span>Delivered orders</span><i class="bi bi-bicycle"></i></div>
+        <strong>{{ delivered_orders|default:"0" }}</strong>
+        <small>{{ completed_orders|default:"0" }} completed orders</small>
+    </article>
+</section>
+
+<section class="reports-chart-grid">
+    <article class="panel reports-chart-panel reports-revenue-panel">
+        <div class="reports-revenue-heading">
+            <div class="reports-revenue-title">
+                <h2>Revenue trend <i class="bi bi-chevron-down"></i></h2>
+                <p>{{ period_label }}</p>
+            </div>
+            <nav class="reports-period-tabs" aria-label="Revenue chart period">
+                {% for period, label in period_choices.items %}
+                <a href="?period={{ period }}" class="{% if selected_period == period %}active{% endif %}" {% if selected_period == period %}aria-current="true"{% endif %} title="{{ label }}">{{ period }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+        <div class="reports-revenue-total">
+            <strong>UGX {{ period_revenue|floatformat:"0" }}</strong>
+            {% if period_change != None %}
+            <span class="{% if period_change >= 0 %}positive{% else %}negative{% endif %}">
+                <i class="bi {% if period_change >= 0 %}bi-arrow-up-right{% else %}bi-arrow-down-right{% endif %}"></i>{{ period_change|floatformat:"1" }}%
+            </span>
+            <small>vs previous period</small>
+            {% else %}
+            <small>completed-order revenue</small>
+            {% endif %}
+        </div>
+        {% if revenue_chart.labels %}
+        <div class="reports-chart-area reports-chart-area-wide"><canvas id="restaurantChart" aria-label="Completed revenue over {{ period_label }}"></canvas></div>
+        {% else %}
+        <div class="reports-chart-empty"><i class="bi bi-bar-chart"></i><span>No completed revenue in this period.</span></div>
+        {% endif %}
+    </article>
+    <article class="panel reports-chart-panel reports-status-panel">
+        <div class="reports-panel-heading">
+            <div><h2>Orders by status</h2><p>Current order distribution</p></div>
+            <span class="reports-panel-icon"><i class="bi bi-three-dots"></i></span>
+        </div>
+        {% if status_chart.labels %}
+        <div class="reports-chart-area reports-chart-area-doughnut"><canvas id="statusChart" aria-label="Orders grouped by status"></canvas></div>
+        <div class="reports-status-legend">
+            {% for label in status_chart.labels %}
+            <span><i class="reports-legend-dot reports-legend-{{ forloop.counter }}"></i>{{ label }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="reports-chart-empty"><i class="bi bi-pie-chart"></i><span>No order statuses to chart yet.</span></div>
+        {% endif %}
+    </article>
+</section>
+
+<section class="reports-tables-grid">
+    <article class="panel reports-table-panel">
+        <div class="reports-panel-heading">
+            <div><h2>Revenue by restaurant</h2><p>Completed-order revenue, highest first</p></div>
+            <a href="{% url 'orders:restaurant_list' %}" class="reports-panel-link">View restaurants <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="table reports-table align-middle mb-0">
+                <thead><tr><th>Restaurant</th><th class="text-end">Orders</th><th class="text-end">Revenue</th></tr></thead>
                 <tbody>
-                    {% for item in best_items %}
-                    <tr>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.restaurant.name }}</td>
-                        <td class="text-end fw-semibold">{{ item.qty }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="3" class="text-center text-muted">No sales yet.</td></tr>
-                    {% endfor %}
+                    {% for restaurant in revenue_by_restaurant %}
+                    <tr><td class="reports-primary-cell">{{ restaurant.name }}</td><td class="text-end">{{ restaurant.orders }}</td><td class="text-end reports-number-cell">UGX {{ restaurant.revenue|default:"0"|floatformat:"0" }}</td></tr>
+                    {% empty %}<tr><td colspan="3" class="reports-empty-row">No restaurant revenue yet.</td></tr>{% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card p-4">
-            <h5 class="fw-semibold mb-3">Rider Performance</h5>
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr><th>Rider</th><th class="text-end">Assigned</th><th class="text-end">Delivered</th></tr>
-                </thead>
+    </article>
+    <article class="panel reports-table-panel">
+        <div class="reports-panel-heading">
+            <div><h2>Best-selling menu items</h2><p>Ranked by quantity sold</p></div>
+            <a href="{% url 'orders:menu_list' %}" class="reports-panel-link">View menu <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="table reports-table align-middle mb-0">
+                <thead><tr><th>Item</th><th>Restaurant</th><th class="text-end">Qty sold</th></tr></thead>
+                <tbody>
+                    {% for item in best_items %}
+                    <tr><td class="reports-primary-cell">{{ item.name }}</td><td>{{ item.restaurant.name }}</td><td class="text-end reports-number-cell">{{ item.qty }}</td></tr>
+                    {% empty %}<tr><td colspan="3" class="reports-empty-row">No menu item sales yet.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+    <article class="panel reports-table-panel">
+        <div class="reports-panel-heading">
+            <div><h2>Rider performance</h2><p>Delivery activity by rider</p></div>
+            <a href="{% url 'orders:rider_list' %}" class="reports-panel-link">View riders <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="table reports-table align-middle mb-0">
+                <thead><tr><th>Rider</th><th class="text-end">Assigned</th><th class="text-end">Delivered</th></tr></thead>
                 <tbody>
                     {% for rider in riders %}
                     <tr>
-                        <td>{{ rider.name }}</td>
+                        <td><span class="reports-rider-name"><span>{{ rider.name|slice:":1"|upper }}</span>{{ rider.name }}</span></td>
                         <td class="text-end">{{ rider.total }}</td>
-                        <td class="text-end fw-semibold">{{ rider.delivered }}</td>
+                        <td class="text-end reports-number-cell">{{ rider.delivered }}</td>
                     </tr>
-                    {% empty %}
-                    <tr><td colspan="3" class="text-center text-muted">No riders.</td></tr>
-                    {% endfor %}
+                    {% empty %}<tr><td colspan="3" class="reports-empty-row">No rider activity yet.</td></tr>{% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
+    </article>
+</section>
 
-{{ restaurant_chart|json_script:"restaurant-data" }}
+{{ revenue_chart|json_script:"revenue-data" }}
 {{ status_chart|json_script:"status-data" }}
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-    const rd = JSON.parse(document.getElementById('restaurant-data').textContent);
-    const sd = JSON.parse(document.getElementById('status-data').textContent);
+    const revenueData = JSON.parse(document.getElementById('revenue-data').textContent);
+    const statusData = JSON.parse(document.getElementById('status-data').textContent);
+    const reportFont = { family: 'Inter, sans-serif' };
 
-    new Chart(document.getElementById('restaurantChart'), {
-        type: 'bar',
-        data: {
-            labels: rd.labels,
-            datasets: [{ label: 'Revenue (UGX)', data: rd.values, backgroundColor: '#4361ee', borderRadius: 6 }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+    if (revenueData.labels.length) {
+        new Chart(document.getElementById('restaurantChart'), {
+            type: 'bar',
+            data: {
+                labels: revenueData.labels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Revenue',
+                        data: revenueData.values,
+                        backgroundColor: context => {
+                            const values = context.dataset.data;
+                            const maxIndex = values.indexOf(Math.max(...values));
+                            return context.dataIndex === maxIndex ? 'rgba(101, 200, 190, .28)' : 'rgba(190, 196, 202, .22)';
+                        },
+                        borderRadius: 2,
+                        borderSkipped: false,
+                        maxBarThickness: 34,
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Revenue trend',
+                        data: revenueData.values,
+                        borderColor: '#65bfb3',
+                        borderWidth: 2,
+                        borderDash: [2, 4],
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#378f83',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        tension: .35,
+                        fill: false,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        displayColors: false,
+                        callbacks: {
+                            title: items => items[0]?.label ?? '',
+                            label: context => `UGX ${Number(context.raw).toLocaleString()}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: reportFont, color: '#8993a3', maxTicksLimit: 12, maxRotation: 0 }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: reportFont,
+                            color: '#8993a3',
+                            maxTicksLimit: 5,
+                            callback: value => Number(value) === 0 ? '0' : `${(Number(value) / 1000).toLocaleString()}k`
+                        },
+                        grid: { color: '#edf0f5', borderDash: [3, 4] },
+                        border: { display: false }
+                    }
+                }
+            }
+        });
+    }
 
-    const statusColors = {
-        'Pending': '#ff9f1c',
-        'Preparing': '#4cc9f0',
-        'Completed': '#2ec4b6',
-        'Cancelled': '#e71d36'
-    };
-
-    new Chart(document.getElementById('statusChart'), {
-        type: 'pie',
-        data: {
-            labels: sd.labels,
-            datasets: [{ data: sd.values, backgroundColor: sd.labels.map(l => statusColors[l]) }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
+    if (statusData.labels.length) {
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: statusData.labels,
+                datasets: [{
+                    data: statusData.values,
+                    backgroundColor: ['#f2b755', '#62bfd0', '#70c993', '#df7880'],
+                    borderWidth: 0,
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
 </script>
 {% endblock %}
