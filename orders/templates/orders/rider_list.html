@@ -1,41 +1,88 @@
-<!-- orders/templates/orders/rider_list.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Delivery Riders{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">Delivery Riders</h1>
+<section class="customers-page-heading">
+    <div>
+        <p class="eyebrow">DELIVERY TEAM</p>
+        <h1>Riders</h1>
+        <p class="customers-page-subtitle">Keep track of your delivery team and their current workload.</p>
+    </div>
+    <a href="{% url 'orders:rider_create' %}" class="btn btn-primary customers-add-button">
+        <i class="bi bi-plus-lg"></i><span>Add rider</span>
+    </a>
+</section>
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <select name="status" class="form-select" onchange="this.form.submit()">
-            <option value="">All Statuses</option>
-            {% for s in statuses %}
-            <option value="{{ s.0 }}" {% if current_status == s.0 %}selected{% endif %}>{{ s.1 }}</option>
-            {% endfor %}
-        </select>
-    </div>
-</form>
-
-<div class="row">
-    {% for rider in riders %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ rider.name }}</h5>
-                <p class="card-text">
-                    <strong>ID:</strong> {{ rider.rider_id }}<br>
-                    <strong>Status:</strong>
-                    <span class="badge bg-{% if rider.status == 'available' %}success{% elif rider.status == 'busy' %}warning{% else %}secondary{% endif %}">
-                        {{ rider.get_status_display }}
-                    </span><br>
-                    <strong>Rating:</strong> ⭐ {{ rider.rating }}
-                </p>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">No riders found</div>
-    </div>
+<section class="customers-overview rider-overview" aria-label="Rider summary">
+    <a class="customer-summary-card rider-summary-link {% if not current_status %}is-selected{% endif %}" href="{% url 'orders:rider_list' %}">
+        <span class="customer-summary-icon customer-summary-blue"><i class="bi bi-people"></i></span>
+        <span><small>All riders</small><strong>{{ rider_total }}</strong></span>
+    </a>
+    {% for status in rider_status_overview %}
+    <a class="customer-summary-card rider-summary-link rider-summary-{{ status.value }} {% if current_status == status.value %}is-selected{% endif %}" href="{% url 'orders:rider_list' %}?status={{ status.value }}">
+        <span class="customer-summary-icon"><i class="{% if status.value == 'available' %}bi bi-bicycle{% elif status.value == 'busy' %}bi bi-box-seam{% else %}bi bi-moon{% endif %}"></i></span>
+        <span><small>{{ status.label }}</small><strong>{{ status.count }}</strong></span>
+    </a>
     {% endfor %}
-</div>
+</section>
+
+<section class="panel customers-directory-panel">
+    <div class="customers-directory-heading">
+        <div>
+            <h2>Rider directory <span>{{ riders.count }}</span></h2>
+            <p>{% if current_status %}{{ current_status|title }} riders{% else %}Rider status, ratings, and delivery activity{% endif %}{% if search_query %} matching “{{ search_query }}”{% endif %}</p>
+        </div>
+        {% if current_status or search_query %}
+        <a class="orders-clear-link" href="{% url 'orders:rider_list' %}"><i class="bi bi-x-circle"></i> Clear filters</a>
+        {% endif %}
+    </div>
+    <form method="get" class="rider-search-form">
+        <label class="orders-search-field">
+            <i class="bi bi-search"></i>
+            <input type="search" name="search" placeholder="Search by rider name or ID" value="{{ search_query|default:'' }}" aria-label="Search riders">
+        </label>
+        <label class="rider-status-select">
+            <span class="visually-hidden">Filter by rider status</span>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                {% for status in statuses %}
+                <option value="{{ status.0 }}" {% if current_status == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i><span>Apply filters</span></button>
+    </form>
+
+    <div class="customers-grid rider-directory-grid">
+        {% for rider in riders %}
+        <article class="customer-contact-card rider-contact-card">
+            <div class="contact-card-top">
+                <span class="contact-avatar rider-contact-avatar">{{ rider.name|slice:":1"|upper }}</span>
+                <span class="rider-status-indicator rider-status-{{ rider.status }}"><i class="bi bi-circle-fill"></i>{{ rider.get_status_display }}</span>
+            </div>
+            <h3>{{ rider.name }}</h3>
+            <p class="contact-customer-id">{{ rider.rider_id }}</p>
+            <div class="rider-profile-rating">
+                <span class="rider-rating-stars"><i class="bi bi-star-fill"></i></span>
+                <strong>{{ rider.rating|floatformat:"1" }}</strong>
+                <small>Rider rating</small>
+            </div>
+            <div class="contact-card-footer rider-contact-footer">
+                <span><strong>{{ rider.order_count }}</strong> order{{ rider.order_count|pluralize }}</span>
+                <span><strong>{{ rider.delivered_count }}</strong> delivered</span>
+            </div>
+        </article>
+        {% empty %}
+        <div class="customers-empty">
+            <span><i class="bi bi-bicycle"></i></span>
+            <strong>{% if search_query or current_status %}No matching riders{% else %}No riders yet{% endif %}</strong>
+            <small>{% if search_query or current_status %}Try changing your search or status filter.{% else %}Add a delivery rider to start assigning deliveries.{% endif %}</small>
+            {% if not search_query and not current_status %}
+            <a href="{% url 'orders:rider_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add rider</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}

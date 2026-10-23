@@ -1,55 +1,128 @@
-<!-- orders/templates/orders/menu_list.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Menu Items{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">Menu Items</h1>
+<section class="orders-page-heading">
+    <div>
+        <p class="eyebrow">MENU MANAGEMENT</p>
+        <h1>Menu items</h1>
+        <p class="orders-page-subtitle">Manage dishes, prices, and availability across your restaurants.</p>
+    </div>
+    <a href="{% url 'orders:menu_item_create' %}" class="btn btn-primary orders-create-button">
+        <i class="bi bi-plus-lg"></i><span>Add menu item</span>
+    </a>
+</section>
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <select name="restaurant" class="form-select">
-            <option value="">All Restaurants</option>
-            {% for r in restaurants %}
-            <option value="{{ r.pk }}" {% if selected_restaurant == r.pk|stringformat:"s" %}selected{% endif %}>
-                {{ r.name }}
-            </option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-4">
-        <select name="category" class="form-select">
-            <option value="">All Categories</option>
-            {% for c in categories %}
-            <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
-    </div>
-</form>
+<section class="orders-status-overview menu-status-overview" aria-label="Menu item counts">
+    <a class="orders-overview-card {% if not availability_filter %}selected{% endif %}" href="{% url 'orders:menu_list' %}">
+        <span class="orders-overview-icon overview-total"><i class="bi bi-journal-text"></i></span>
+        <span class="orders-overview-copy"><small>All items</small><strong>{{ menu_item_total }}</strong></span>
+        <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
+    </a>
+    <a class="orders-overview-card {% if availability_filter == 'available' %}selected{% endif %}" href="{% url 'orders:menu_list' %}?availability=available">
+        <span class="orders-overview-icon overview-completed"><i class="bi bi-check2-circle"></i></span>
+        <span class="orders-overview-copy"><small>Available</small><strong>{{ available_item_total }}</strong></span>
+        <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
+    </a>
+    <a class="orders-overview-card {% if availability_filter == 'unavailable' %}selected{% endif %}" href="{% url 'orders:menu_list' %}?availability=unavailable">
+        <span class="orders-overview-icon overview-cancelled"><i class="bi bi-pause-circle"></i></span>
+        <span class="orders-overview-copy"><small>Unavailable</small><strong>{{ unavailable_item_total }}</strong></span>
+        <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
+    </a>
+</section>
 
-<div class="row">
-    {% for item in menu_items %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ item.name }}</h5>
-                <p class="card-text">
-                    <strong>Restaurant:</strong> {{ item.restaurant.name }}<br>
-                    <strong>Category:</strong> {{ item.category|default:"-" }}<br>
-                    <strong>Price:</strong> UGX {{ item.price|floatformat:0 }}<br>
-                    <strong>Status:</strong>
-                    <span class="badge bg-{% if item.is_available %}success{% else %}danger{% endif %}">
-                        {% if item.is_available %}Available{% else %}Unavailable{% endif %}
-                    </span>
-                </p>
-            </div>
+<section class="panel orders-filter-panel">
+    <div class="orders-filter-title">
+        <div>
+            <h2>Menu catalogue</h2>
+            <p>{{ menu_items.count }} item{{ menu_items.count|pluralize }}{% if selected_restaurant %} for selected restaurant{% endif %}{% if selected_category %} in {{ selected_category }}{% endif %}</p>
         </div>
+        {% if search_query or selected_restaurant or selected_category or availability_filter %}
+        <a class="orders-clear-link" href="{% url 'orders:menu_list' %}"><i class="bi bi-x-circle"></i> Clear filters</a>
+        {% endif %}
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">No menu items found</div>
+    <form method="get" class="menu-filter-form">
+        <label class="orders-search-field">
+            <i class="bi bi-search"></i>
+            <input type="search" name="search" placeholder="Search item, restaurant, or category" value="{{ search_query|default:'' }}" aria-label="Search menu items">
+        </label>
+        <label>
+            <span class="visually-hidden">Filter by restaurant</span>
+            <select name="restaurant" class="form-select">
+                <option value="">All restaurants</option>
+                {% for restaurant in restaurants %}
+                <option value="{{ restaurant.pk }}" {% if selected_restaurant == restaurant.pk|stringformat:"s" %}selected{% endif %}>{{ restaurant.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span class="visually-hidden">Filter by category</span>
+            <select name="category" class="form-select">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span class="visually-hidden">Filter by availability</span>
+            <select name="availability" class="form-select">
+                <option value="">Any availability</option>
+                <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
+                <option value="unavailable" {% if availability_filter == 'unavailable' %}selected{% endif %}>Unavailable</option>
+            </select>
+        </label>
+        <button type="submit" class="btn btn-primary orders-filter-button"><i class="bi bi-funnel"></i><span>Apply filters</span></button>
+    </form>
+</section>
+
+<section class="panel menu-gallery-panel">
+    <div class="orders-table-heading menu-gallery-heading">
+        <div>
+            <h2>Menu catalogue <span>{{ menu_items.count }}</span></h2>
+            <p>Explore dishes from your restaurants</p>
+        </div>
+        <span class="orders-updated-label"><i class="bi bi-grid"></i> Menu gallery</span>
     </div>
-    {% endfor %}
-</div>
+    <div class="menu-gallery-grid">
+        {% for item in menu_items %}
+        <article class="menu-gallery-card {% if not item.is_available %}menu-gallery-unavailable{% endif %}">
+            <div class="menu-gallery-image-wrap">
+                {% if item.image_url %}
+                <img class="menu-gallery-image" src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
+                {% else %}
+                <div class="menu-gallery-image menu-gallery-image-fallback" role="img" aria-label="Food image not available">
+                    <span><i class="bi bi-egg-fried"></i></span>
+                </div>
+                {% endif %}
+                <span class="menu-availability {% if item.is_available %}is-available{% else %}is-unavailable{% endif %}">
+                    <i class="bi bi-circle-fill"></i>{% if item.is_available %}Available{% else %}Unavailable{% endif %}
+                </span>
+                <span class="menu-gallery-category">{{ item.category|default:"Uncategorized" }}</span>
+            </div>
+            <div class="menu-gallery-content">
+                <div class="menu-gallery-title">
+                    <div>
+                        <h3>{{ item.name }}</h3>
+                        <p><i class="bi bi-shop"></i>{{ item.restaurant.name }}</p>
+                    </div>
+                    <strong>UGX {{ item.price|floatformat:"0" }}</strong>
+                </div>
+                <div class="menu-gallery-footer">
+                    <span>{{ item.item_id }}</span>
+                    <span><i class="bi bi-bag-check"></i>{{ item.quantity_ordered|default:"0" }} sold</span>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="orders-empty menu-gallery-empty">
+            <span><i class="bi bi-journal-x"></i></span>
+            <strong>No menu items found</strong>
+            <small>Try changing the filters or add an item to your menu.</small>
+            <a href="{% url 'orders:menu_item_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add menu item</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}

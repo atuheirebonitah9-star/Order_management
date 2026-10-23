@@ -1,108 +1,118 @@
-<!-- orders/templates/orders/order_list.html -->
 {% extends 'orders/base.html' %}
 
-{% block title %}Orders - OrderHub{% endblock %}
+{% block title %}Orders{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">Orders</h1>
+<section class="orders-page-heading">
+    <div>
+        <p class="eyebrow">ORDER MANAGEMENT</p>
+        <h1>Orders</h1>
+        <p class="orders-page-subtitle">Review and manage customer orders across your restaurants.</p>
+    </div>
+    <a href="{% url 'orders:order_create' %}" class="btn btn-primary orders-create-button">
+        <i class="bi bi-plus-lg"></i><span>New order</span>
+    </a>
+</section>
+
+<section class="orders-status-overview" aria-label="Order counts by status">
+    <a class="orders-overview-card {% if not current_status %}selected{% endif %}" href="{% url 'orders:order_list' %}">
+        <span class="orders-overview-icon overview-total"><i class="bi bi-receipt"></i></span>
+        <span class="orders-overview-copy"><small>All orders</small><strong>{{ order_total }}</strong></span>
+        <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
+    </a>
+    {% for status in status_overview %}
+    <a class="orders-overview-card {% if current_status == status.value %}selected{% endif %}" href="{% url 'orders:order_list' %}?status={{ status.value }}">
+        <span class="orders-overview-icon overview-{{ status.value }}"><i class="{% if status.value == 'pending' %}bi bi-hourglass-split{% elif status.value == 'preparing' %}bi bi-fire{% elif status.value == 'completed' %}bi bi-check2-circle{% else %}bi bi-x-circle{% endif %}"></i></span>
+        <span class="orders-overview-copy"><small>{{ status.label }}</small><strong>{{ status.count }}</strong></span>
+        <span class="overview-arrow"><i class="bi bi-arrow-up-right"></i></span>
+    </a>
+    {% endfor %}
+</section>
+
+<section class="panel orders-filter-panel">
+    <div class="orders-filter-title">
         <div>
-            <span class="badge bg-secondary me-2">
-                Total: {{ orders.count }}
-            </span>
+            <h2>Order list</h2>
+            <p>{{ orders.count }} order{{ orders.count|pluralize }}{% if current_status %} matching {{ current_status }}{% endif %}{% if search_query %} for “{{ search_query }}”{% endif %}</p>
         </div>
+        {% if current_status or search_query %}
+        <a class="orders-clear-link" href="{% url 'orders:order_list' %}"><i class="bi bi-x-circle"></i> Clear filters</a>
+        {% endif %}
     </div>
+    <form method="get" class="orders-filter-form">
+        <label class="orders-search-field">
+            <i class="bi bi-search"></i>
+            <input type="search" name="search" placeholder="Search by customer, restaurant, or address" value="{{ search_query|default:'' }}" aria-label="Search orders">
+        </label>
+        <label class="orders-status-field">
+            <span class="visually-hidden">Filter by status</span>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                {% for status in statuses %}
+                <option value="{{ status.0 }}" {% if current_status == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="btn btn-primary orders-filter-button"><i class="bi bi-funnel"></i><span>Apply filters</span></button>
+    </form>
+</section>
 
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <div class="search-bar">
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Search orders..." value="{{ search_query|default:'' }}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
-                        {% for status in statuses %}
-                        <option value="{{ status.0 }}" {% if current_status == status.0 %}selected{% endif %}>
-                            {{ status.1 }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
+<section class="panel orders-table-panel">
+    <div class="orders-table-heading">
+        <div>
+            <h2>All orders <span>{{ orders.count }}</span></h2>
+            <p>Most recent orders appear first</p>
         </div>
+        <span class="orders-updated-label"><i class="bi bi-arrow-down-wide-short"></i> Newest first</span>
     </div>
-
-    <!-- Orders Table -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Restaurant</th>
-                            <th>Rider</th>
-                            <th>Status</th>
-                            <th>Delivery</th>
-                            <th>Total</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                        <tr>
-                            <td><strong>#{{ order.order_id }}</strong></td>
-                            <td>{{ order.customer.customer_name }}</td>
-                            <td>{{ order.restaurant.name }}</td>
-                            <td>
-                                {% if order.rider %}
-                                    {{ order.rider.name }}
-                                {% else %}
-                                    <span class="text-muted">Not assigned</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge {% if order.status == 'pending' %}bg-warning text-dark{% elif order.status == 'preparing' %}bg-info text-dark{% elif order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                    {{ order.get_status_display }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge {% if order.delivery_status == 'delivered' %}bg-success{% elif order.delivery_status == 'in_transit' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
-                                    {{ order.get_delivery_status_display }}
-                                </span>
-                            </td>
-                            <td>UGX {{ order.total|floatformat:0 }}</td>
-                            <td>{{ order.placed_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                <a href="{% url 'orders:order_detail' order.order_id %}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <i class="fas fa-box-open fa-2x text-muted d-block mb-2"></i>
-                                No orders found
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div class="table-responsive">
+        <table class="table orders-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Restaurant</th>
+                    <th>Rider</th>
+                    <th>Status</th>
+                    <th>Delivery</th>
+                    <th class="text-end">Total</th>
+                    <th>Date</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><a class="orders-id" href="{% url 'orders:order_detail' order.order_id %}">#{{ order.order_id }}</a></td>
+                    <td><span class="orders-customer">{{ order.customer.customer_name }}</span></td>
+                    <td>
+                        <span class="orders-restaurant-cell">{{ order.restaurant.name }}</span>
+                    </td>
+                    <td>
+                        {% if order.rider %}
+                        <span class="orders-rider"><span class="orders-rider-avatar">{{ order.rider.name|slice:":1"|upper }}</span>{{ order.rider.name }}</span>
+                        {% else %}
+                        <span class="orders-unassigned"><i class="bi bi-dash-circle"></i> Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="orders-status-pill orders-status-{{ order.status }}"><span></span>{{ order.get_status_display }}</span></td>
+                    <td><span class="orders-delivery-pill orders-delivery-{{ order.delivery_status }}">{{ order.get_delivery_status_display }}</span></td>
+                    <td class="text-end orders-total">UGX {{ order.total|floatformat:"0" }}</td>
+                    <td><span class="orders-date">{{ order.placed_at|date:"M j, Y" }}</span><small class="orders-time">{{ order.placed_at|date:"H:i" }}</small></td>
+                    <td class="text-end"><a class="orders-action" href="{% url 'orders:order_detail' order.order_id %}" aria-label="View order {{ order.order_id }}" title="View order"><i class="bi bi-arrow-up-right"></i></a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="orders-empty">
+                        <span><i class="bi bi-inbox"></i></span>
+                        <strong>No orders found</strong>
+                        <small>Try changing your search or filters, or create a new order.</small>
+                        <a href="{% url 'orders:order_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New order</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
+</section>
 {% endblock %}

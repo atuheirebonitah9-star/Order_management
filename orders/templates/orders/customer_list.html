@@ -1,44 +1,93 @@
-<!-- orders/templates/orders/customer_list.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Customers{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">Customers</h1>
-
-<form method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text" name="search" class="form-control"
-               placeholder="Search by name, email or phone"
-               value="{{ search_query|default:'' }}">
-        <button type="submit" class="btn btn-primary">Search</button>
+<section class="customers-page-heading">
+    <div>
+        <p class="eyebrow">CUSTOMER DIRECTORY</p>
+        <h1>Customers</h1>
+        <p class="customers-page-subtitle">Keep in touch with the people who order from your restaurants.</p>
     </div>
-</form>
+    <a href="{% url 'orders:customer_create' %}" class="btn btn-primary customers-add-button">
+        <i class="bi bi-plus-lg"></i><span>Add customer</span>
+    </a>
+</section>
 
-<div class="card">
-    <div class="card-body">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for customer in customers %}
-                <tr>
-                    <td>{{ customer.customer_id }}</td>
-                    <td>{{ customer.customer_name }}</td>
-                    <td>{{ customer.email_address }}</td>
-                    <td>{{ customer.phone_contact }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center py-4">No customers found</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<section class="customers-overview" aria-label="Customer summary">
+    <article class="customer-summary-card">
+        <span class="customer-summary-icon customer-summary-blue"><i class="bi bi-people"></i></span>
+        <span><small>All customers</small><strong>{{ customer_total }}</strong></span>
+    </article>
+    <article class="customer-summary-card">
+        <span class="customer-summary-icon customer-summary-green"><i class="bi bi-person-check"></i></span>
+        <span><small>Ordered before</small><strong>{{ customers_with_orders }}</strong></span>
+    </article>
+    <article class="customer-summary-card customer-summary-tip">
+        <span class="customer-summary-icon customer-summary-peach"><i class="bi bi-person-plus"></i></span>
+        <span><small>Grow your customer list</small><strong>Add a customer</strong></span>
+        <a href="{% url 'orders:customer_create' %}" aria-label="Add a customer"><i class="bi bi-arrow-up-right"></i></a>
+    </article>
+</section>
+
+<section class="panel customers-directory-panel">
+    <div class="customers-directory-heading">
+        <div>
+            <h2>Contact directory <span>{{ customers.count }}</span></h2>
+            <p>{% if search_query %}Matching “{{ search_query }}”{% else %}Customer details and order activity{% endif %}</p>
+        </div>
+        {% if search_query %}
+        <a class="orders-clear-link" href="{% url 'orders:customer_list' %}"><i class="bi bi-x-circle"></i> Clear search</a>
+        {% endif %}
     </div>
-</div>
+    <form method="get" class="customers-search-form">
+        <label class="orders-search-field">
+            <i class="bi bi-search"></i>
+            <input type="search" name="search" placeholder="Search by name, email, or phone" value="{{ search_query|default:'' }}" aria-label="Search customers">
+        </label>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i><span>Search contacts</span></button>
+    </form>
+
+    <div class="customers-grid">
+        {% for customer in customers %}
+        <article class="customer-contact-card">
+            <div class="contact-card-top">
+                <span class="contact-avatar">
+                    {{ customer.customer_name|slice:":1"|upper }}
+                </span>
+                <span class="contact-order-indicator {% if customer.order_count %}has-orders{% endif %}" title="{% if customer.order_count %}Has placed orders{% else %}No orders yet{% endif %}">
+                    <i class="bi {% if customer.order_count %}bi-check-lg{% else %}bi-dash{% endif %}"></i>
+                </span>
+                <div class="contact-card-menu">
+                    <a href="{% url 'orders:customer_update' customer.customer_id %}" aria-label="Edit {{ customer.customer_name }}" title="Edit customer"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'orders:customer_delete' customer.customer_id %}" aria-label="Delete {{ customer.customer_name }}" title="Delete customer"><i class="bi bi-trash3"></i></a>
+                </div>
+            </div>
+            <h3>{{ customer.customer_name }}</h3>
+            <p class="contact-customer-id">{{ customer.customer_id }}</p>
+            <div class="contact-details">
+                {% if customer.email_address %}
+                <a href="mailto:{{ customer.email_address }}"><i class="bi bi-envelope"></i><span>{{ customer.email_address }}</span></a>
+                {% else %}
+                <span><i class="bi bi-envelope"></i><span>Email not provided</span></span>
+                {% endif %}
+                <a href="tel:{{ customer.phone_contact }}"><i class="bi bi-telephone"></i><span>{{ customer.phone_contact }}</span></a>
+            </div>
+            <div class="contact-card-footer">
+                <span><strong>{{ customer.order_count }}</strong> order{{ customer.order_count|pluralize }}</span>
+                <span>{% if customer.total_spent %}UGX {{ customer.total_spent|floatformat:"0" }}{% else %}No spend yet{% endif %}</span>
+            </div>
+        </article>
+        {% empty %}
+        <div class="customers-empty">
+            <span><i class="bi bi-person-lines-fill"></i></span>
+            <strong>{% if search_query %}No matching customers{% else %}No customers yet{% endif %}</strong>
+            <small>{% if search_query %}Try a different name, email, or phone number.{% else %}Add a customer to start building your directory.{% endif %}</small>
+            {% if not search_query %}
+            <a href="{% url 'orders:customer_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add customer</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
