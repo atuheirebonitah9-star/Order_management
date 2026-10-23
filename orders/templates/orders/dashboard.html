@@ -1,209 +1,256 @@
-<!-- orders/templates/orders/dashboard.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<!-- Header with Title and Quick Action -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h2>
+<section class="dashboard-heading">
     <div>
-        <a href="{% url 'orders:order_create' %}" class="btn btn-primary shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> New Order
-        </a>
+        <p class="eyebrow">{% now "l, F j, Y" %}</p>
+        <h1>Good day, {{ user.first_name|default:user.username }}</h1>
+        <p class="text-muted mb-0">Here’s your order operations overview.</p>
     </div>
-</div>
+    <a href="{% url 'orders:order_create' %}" class="btn btn-primary d-lg-none">
+        <i class="bi bi-plus-lg me-1"></i>New order
+    </a>
+</section>
 
-<!-- 1. Metric Cards Row (Upgraded to Gradients) -->
-<div class="row g-4 mb-4">
-    <div class="col-md-6 col-lg-3">
-        <div class="card metric-card-blue p-4 h-100">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <p>Total Orders</p>
-                    <h3>{{ total_orders|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-cart-check fs-2 opacity-50"></i>
+<section class="metric-grid" aria-label="Order summary">
+    <article class="metric-card metric-lime">
+        <div class="metric-icon icon-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17Z" fill="currentColor" fill-opacity=".12"></path><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17ZM9 8h6M9 12h6M9 16h3"></path><path d="M15 3.5v4h3" fill="currentColor" fill-opacity=".2"></path></svg></div>
+        <div class="metric-copy"><span>Total orders</span><strong>{{ total_orders|default:"0" }}</strong><small>{{ today_orders }} placed today</small></div>
+    </article>
+    <article class="metric-card metric-peach">
+        <div class="metric-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="8" rx="5.5" ry="2.7" fill="currentColor" fill-opacity=".12"></ellipse><path d="M3.5 8v6c0 1.5 2.5 2.7 5.5 2.7M14.5 8v1.5"></path><ellipse cx="9" cy="8" rx="5.5" ry="2.7"></ellipse><path d="M3.5 11c0 1.5 2.5 2.7 5.5 2.7"></path><circle cx="15.5" cy="15.5" r="5"></circle><path d="M17 13.8c-.4-.4-.9-.6-1.6-.6-.9 0-1.5.4-1.5 1.1s.5 1 1.5 1.3 1.5.6 1.5 1.3-.6 1.2-1.5 1.2c-.7 0-1.3-.2-1.7-.7m1.7-5.1v5.8"></path></svg></div>
+        <div class="metric-copy"><span>Revenue today</span><strong>UGX {{ today_revenue|floatformat:"0" }}</strong><small>From completed orders</small></div>
+    </article>
+    <article class="metric-card metric-lavender">
+        <div class="metric-icon icon-green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12M6 20.5h12M7 4c0 4.4 5 4.4 5 8s-5 3.6-5 8m10-16c0 4.4-5 4.4-5 8s5 3.6 5 8"></path><path d="M8.5 6.5c.6 2 2.1 3.2 3.5 4.1 1.4-.9 2.9-2.1 3.5-4.1h-7Zm0 11c.6-2 2.1-3.2 3.5-4.1 1.4.9 2.9 2.1 3.5 4.1h-7Z" fill="currentColor" fill-opacity=".28" stroke="none"></path><path d="M12 10.5v3"></path></svg></div>
+        <div class="metric-copy"><span>Pending orders</span><strong>{{ pending_orders|default:"0" }}</strong><small>Awaiting preparation</small></div>
+    </article>
+    <article class="metric-card metric-mint">
+        <div class="metric-icon icon-green"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="currentColor" fill-opacity=".1"></circle><circle cx="12" cy="12" r="8.5"></circle><path d="m7.8 12.1 2.8 2.8 5.8-6"></path><path d="m7.8 12.1 2.8 2.8 5.8-6" stroke-width="2.2"></path><path d="m18.3 4.5.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5.5-1.2Z" fill="currentColor" stroke="none"></path></svg></div>
+        <div class="metric-copy"><span>Delivered</span><strong>{{ delivered_orders|default:"0" }}</strong><small>Successfully delivered</small></div>
+    </article>
+    <article class="rider-card">
+        <div class="rider-card-heading">
+            <div>
+                <span class="rider-card-label">Riders</span>
+                <strong>{{ available_riders|default:"0" }}</strong>
+                <small>available now</small>
             </div>
+            <a href="{% url 'orders:rider_list' %}" class="rider-card-action" aria-label="View all riders" title="View all riders">
+                <i class="bi bi-arrow-up-right"></i>
+            </a>
         </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card metric-card-yellow p-4 h-100">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <p>Pending</p>
-                    <h3>{{ pending_orders|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-hourglass-split fs-2 opacity-50"></i>
-            </div>
+        <div class="rider-card-people">
+            {% for rider in available_rider_preview %}
+            <span class="rider-person">
+                <span class="rider-avatar rider-avatar-{{ forloop.counter }}" aria-hidden="true">{{ rider.name|slice:":1"|upper }}</span>
+                <span>{{ rider.name }}</span>
+            </span>
+            {% empty %}
+            <span class="rider-empty"><i class="bi bi-bicycle"></i> No riders available</span>
+            {% endfor %}
         </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card metric-card-green p-4 h-100">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <p>Delivered</p>
-                    <h3>{{ delivered_orders|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-check-circle fs-2 opacity-50"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card metric-card-cyan p-4 h-100">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <p>Available Riders</p>
-                    <h3>{{ available_riders|default:"0" }}</h3>
-                </div>
-                <i class="bi bi-bicycle fs-2 opacity-50"></i>
-            </div>
-        </div>
-    </div>
-</div>
+    </article>
+</section>
 
-<!-- 2. Recent Orders & Top Customers Row -->
-<div class="row g-4">
-    
-    <!-- Recent Orders Table -->
-    <div class="col-lg-8">
-        <div class="card h-100">
-            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Orders</h5>
-                <a href="{% url 'orders:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+<section class="row g-3 dashboard-charts">
+    <div class="col-12 col-xl-8">
+        <article class="panel chart-panel">
+            <div class="panel-heading">
+                <div><h2>Order activity</h2><p>Orders placed over the last 12 months</p></div>
+                <span class="panel-icon"><i class="bi bi-three-dots"></i></span>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Status</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in recent_orders %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'orders:order_detail' order.order_id %}" class="text-decoration-none fw-bold text-primary">
-                                        {{ order.order_id }}
-                                    </a>
-                                </td>
-                                <td class="fw-medium">{{ order.customer.customer_name }}</td>
-                                <td>
-                                    {% if order.status == 'completed' %}
-                                        <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">Completed</span>
-                                    {% elif order.status == 'pending' %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">Pending</span>
-                                    {% elif order.status == 'preparing' %}
-                                        <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill">Preparing</span>
-                                    {% elif order.status == 'cancelled' %}
-                                        <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">Cancelled</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">{{ order.get_status_display }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end">
-                                    <a href="{% url 'orders:order_detail' order.order_id %}" class="btn btn-sm btn-light border">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No recent orders found.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+            <div class="chart-wrap chart-wrap-bar"><svg id="ordersChart" class="dashboard-chart-svg" viewBox="0 0 720 225" role="img" aria-label="Monthly order activity chart"></svg></div>
+        </article>
     </div>
+    <div class="col-12 col-xl-4">
+        <article class="panel chart-panel">
+            <div class="panel-heading">
+                <div><h2>Order status</h2><p>Current order distribution</p></div>
+                <span class="panel-icon"><i class="bi bi-three-dots"></i></span>
+            </div>
+            <div class="chart-wrap chart-wrap-doughnut"><svg id="statusChart" class="dashboard-chart-svg" viewBox="0 0 200 200" role="img" aria-label="Order status breakdown chart"></svg></div>
+            <div class="chart-legend">
+                {% for status in status_labels %}
+                <span><i class="legend-dot legend-{{ forloop.counter }}"></i>{{ status }}</span>
+                {% endfor %}
+            </div>
+        </article>
+    </div>
+</section>
 
-    <!-- Top Customers List -->
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-header bg-white border-0 pt-4 pb-0">
-                <h5 class="fw-bold mb-0"><i class="bi bi-trophy me-2 text-warning"></i>Top Customers</h5>
+<section class="row g-3 dashboard-lists">
+    <div class="col-12">
+        <article class="panel table-panel recent-orders-panel">
+            <div class="panel-heading">
+                <div><h2>Recent orders</h2><p>Latest order activity across your restaurants</p></div>
+                <a href="{% url 'orders:order_list' %}" class="panel-link">All orders <i class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    {% for customer in top_customers %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                        <div class="d-flex align-items-center">
-                            <!-- Circular Avatar with first letter of name -->
-                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 42px; height: 42px;">
-                                {{ customer.customer_name|slice:":1"|upper }}
-                            </div>
-                            <div>
-                                <span class="fw-medium d-block">{{ customer.customer_name }}</span>
-                                <small class="text-muted">UGX {{ customer.total_spent|default:"0"|floatformat:"0" }}</small>
-                            </div>
-                        </div>
-                        <span class="badge bg-primary rounded-pill">{{ customer.order_count }} orders</span>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item text-center text-muted px-0 py-4">
-                        <i class="bi bi-people fs-1 d-block mb-2"></i>
-                        No customer data yet.
-                    </li>
-                    {% endfor %}
-                </ul>
+            <div class="table-responsive">
+                <table class="table dashboard-table align-middle mb-0">
+                    <thead><tr><th>Order</th><th>Customer</th><th>Restaurant</th><th>Placed</th><th>Status</th><th class="text-end">Total</th><th class="text-end">Details</th></tr></thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td><a class="order-reference" href="{% url 'orders:order_detail' order.order_id %}">#{{ order.order_id }}</a></td>
+                            <td>{{ order.customer.customer_name }}</td>
+                            <td>{{ order.restaurant.name }}</td>
+                            <td>{{ order.placed_at|date:"M j, g:i A" }}</td>
+                            <td><span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                            <td class="text-end fw-semibold">UGX {{ order.total|floatformat:"0" }}</td>
+                            <td class="text-end"><a class="order-view-link" href="{% url 'orders:order_detail' order.order_id %}" aria-label="View order {{ order.order_id }}"><i class="bi bi-arrow-up-right"></i></a></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="empty-state">No orders yet. Create an order to get started.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </article>
     </div>
-</div>
+</section>
 
-<!-- 3. Optional Second Row: Top Restaurants & Popular Items -->
-<div class="row g-4 mt-2">
-    <!-- Top Restaurants -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header bg-white border-0 pt-4 pb-0">
-                <h5 class="fw-bold mb-0"><i class="bi bi-shop me-2 text-success"></i>Top Restaurants</h5>
+<section class="row g-3 dashboard-lists">
+    <div class="col-12 col-lg-4">
+        <article class="panel customer-panel">
+            <div class="panel-heading">
+                <div><h2>Top customers</h2><p>By total order value</p></div>
+                <a href="{% url 'orders:customer_list' %}" class="panel-link" aria-label="View customers"><i class="bi bi-arrow-right"></i></a>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    {% for restaurant in top_restaurants %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span class="fw-medium">{{ restaurant.name }}</span>
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill">{{ restaurant.order_count }} orders</span>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item text-center text-muted px-0">No restaurant data.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+            <ul class="customer-list">
+                {% for customer in top_customers %}
+                <li>
+                    <span class="customer-avatar">{{ customer.customer_name|slice:":1"|upper }}</span>
+                    <span class="customer-details"><strong>{{ customer.customer_name }}</strong><small>{{ customer.order_count }} order{{ customer.order_count|pluralize }}</small></span>
+                    <strong class="customer-total">UGX {{ customer.total_spent|default:"0"|floatformat:"0" }}</strong>
+                </li>
+                {% empty %}
+                <li class="empty-state">Customer activity will appear here.</li>
+                {% endfor %}
+            </ul>
+        </article>
     </div>
-    
-    <!-- Popular Menu Items -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header bg-white border-0 pt-4 pb-0">
-                <h5 class="fw-bold mb-0"><i class="bi bi-fire me-2 text-danger"></i>Popular Menu Items</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    {% for item in popular_items %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <div>
-                            <span class="fw-medium d-block">{{ item.name }}</span>
-                            <small class="text-muted">{{ item.restaurant.name }}</small>
-                        </div>
-                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill">{{ item.order_count }} sold</span>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item text-center text-muted px-0">No item data.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+</section>
 
+<section class="row g-3 dashboard-lists">
+    <div class="col-12 col-lg-4">
+        <article class="panel compact-panel">
+            <div class="panel-heading"><div><h2>Top restaurants</h2><p>By number of orders</p></div></div>
+            <ul class="simple-list">
+                {% for restaurant in top_restaurants %}
+                <li><span>{{ restaurant.name }}</span><strong>{{ restaurant.order_count }} orders</strong></li>
+                {% empty %}<li class="empty-state">Restaurant activity will appear here.</li>{% endfor %}
+            </ul>
+        </article>
+    </div>
+    <div class="col-12 col-lg-4">
+        <article class="panel compact-panel">
+            <div class="panel-heading"><div><h2>Popular menu items</h2><p>Most frequently ordered</p></div></div>
+            <ul class="simple-list">
+                {% for item in popular_items %}
+                <li><span>{{ item.name }}<small class="d-block text-muted">{{ item.restaurant.name }}</small></span><strong>{{ item.order_count }} orders</strong></li>
+                {% empty %}<li class="empty-state">Menu item activity will appear here.</li>{% endfor %}
+            </ul>
+        </article>
+    </div>
+</section>
+
+{{ monthly_order_labels|json_script:"monthly-order-labels" }}
+{{ monthly_order_counts|json_script:"monthly-order-counts" }}
+{{ status_labels|json_script:"status-labels" }}
+{{ status_counts|json_script:"status-counts" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const monthlyLabels = JSON.parse(document.getElementById('monthly-order-labels').textContent);
+    const monthlyCounts = JSON.parse(document.getElementById('monthly-order-counts').textContent);
+    const statusLabels = JSON.parse(document.getElementById('status-labels').textContent);
+    const statusCounts = JSON.parse(document.getElementById('status-counts').textContent);
+    const svgNamespace = 'http://www.w3.org/2000/svg';
+    const makeSvgElement = (tag, attributes) => {
+        const element = document.createElementNS(svgNamespace, tag);
+        Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+        return element;
+    };
+
+    const activityChart = document.getElementById('ordersChart');
+    const chartWidth = 720;
+    const chartHeight = 225;
+    const plot = { left: 38, right: 8, top: 12, bottom: 28 };
+    const plotWidth = chartWidth - plot.left - plot.right;
+    const plotHeight = chartHeight - plot.top - plot.bottom;
+    const maximumCount = Math.max(0, ...monthlyCounts);
+    const yMaximum = Math.max(4, maximumCount > 10 ? Math.ceil(maximumCount / 5) * 5 : maximumCount);
+    const yStep = yMaximum > 10 ? yMaximum / 5 : 1;
+    const points = monthlyCounts.map((count, index) => ({
+        x: plot.left + (monthlyCounts.length < 2 ? plotWidth / 2 : index * plotWidth / (monthlyCounts.length - 1)),
+        y: plot.top + plotHeight - count / yMaximum * plotHeight
+    }));
+
+    for (let tick = 0; tick <= yMaximum; tick += yStep) {
+        const y = plot.top + plotHeight - tick / yMaximum * plotHeight;
+        activityChart.append(
+            makeSvgElement('line', { x1: plot.left, x2: chartWidth - plot.right, y1: y, y2: y, class: 'chart-gridline' }),
+            Object.assign(makeSvgElement('text', { x: plot.left - 10, y: y + 3, 'text-anchor': 'end', class: 'chart-axis-label' }), { textContent: tick })
+        );
+    }
+
+    monthlyLabels.forEach((label, index) => {
+        const point = points[index];
+        activityChart.append(makeSvgElement('text', {
+            x: point.x,
+            y: chartHeight - 5,
+            'text-anchor': 'middle',
+            class: 'chart-axis-label'
+        }));
+        activityChart.lastChild.textContent = label;
+    });
+
+    if (points.length) {
+        const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+        const areaPath = `${linePath} L ${points[points.length - 1].x} ${plot.top + plotHeight} L ${points[0].x} ${plot.top + plotHeight} Z`;
+        activityChart.append(
+            makeSvgElement('path', { d: areaPath, class: 'chart-area-fill' }),
+            makeSvgElement('path', { d: linePath, class: 'chart-activity-line' })
+        );
+        points.forEach((point, index) => {
+            const circle = makeSvgElement('circle', { cx: point.x, cy: point.y, r: 3.5, class: 'chart-activity-point' });
+            const title = makeSvgElement('title', {});
+            title.textContent = `${monthlyLabels[index]}: ${monthlyCounts[index]} orders`;
+            circle.append(title);
+            activityChart.append(circle);
+        });
+    }
+
+    const statusChart = document.getElementById('statusChart');
+    const statusColors = ['#5684d5', '#65c8c1', '#77d789', '#df727b'];
+    const statusTotal = statusCounts.reduce((total, count) => total + count, 0);
+    const ring = makeSvgElement('circle', { cx: 100, cy: 100, r: 68, class: 'chart-status-ring' });
+    statusChart.append(ring);
+
+    if (statusTotal) {
+        let offset = 0;
+        statusCounts.forEach((count, index) => {
+            if (!count) return;
+            const segmentLength = count / statusTotal * 2 * Math.PI * 68;
+            const segment = makeSvgElement('circle', {
+                cx: 100,
+                cy: 100,
+                r: 68,
+                stroke: statusColors[index % statusColors.length],
+                'stroke-dasharray': `${segmentLength} ${2 * Math.PI * 68 - segmentLength}`,
+                'stroke-dashoffset': -offset,
+                class: 'chart-status-segment'
+            });
+            const title = makeSvgElement('title', {});
+            title.textContent = `${statusLabels[index]}: ${count}`;
+            segment.append(title);
+            statusChart.append(segment);
+            offset += segmentLength;
+        });
+    }
+</script>
 {% endblock %}

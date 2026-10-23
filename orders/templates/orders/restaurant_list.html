@@ -1,38 +1,94 @@
-<!-- orders/templates/orders/restaurant_list.html -->
 {% extends 'orders/base.html' %}
 
+{% block title %}Restaurants{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">Restaurants</h1>
-
-<form method="get" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="search" class="form-control"
-               placeholder="Search restaurants"
-               value="{{ search_query|default:'' }}">
-        <button type="submit" class="btn btn-primary">Search</button>
+<section class="customers-page-heading restaurants-v2-heading">
+    <div>
+        <p class="eyebrow">ORDERHUB / LOCATIONS</p>
+        <h1>Your restaurants</h1>
+        <p class="customers-page-subtitle">Manage your restaurant locations and track their order activity.</p>
     </div>
-</form>
+    <a href="{% url 'orders:restaurant_create' %}" class="btn btn-primary customers-add-button">
+        <i class="bi bi-plus-lg"></i><span>Add restaurant</span>
+    </a>
+</section>
 
-<div class="row">
-    {% for restaurant in restaurants %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ restaurant.name }}</h5>
-                <p class="card-text">
-                    <strong>Address:</strong> {{ restaurant.address }}<br>
-                    <strong>Status:</strong>
-                    <span class="badge bg-{% if restaurant.is_open %}success{% else %}danger{% endif %}">
-                        {% if restaurant.is_open %}Open{% else %}Closed{% endif %}
-                    </span>
-                </p>
-            </div>
+<section class="restaurants-v2-summary" aria-label="Restaurant summary">
+    <article class="restaurants-v2-stat stat-property">
+        <span class="restaurants-v2-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5V7.7L12 4l8 3.7v12.8M2.5 20.5h19" fill="currentColor" fill-opacity=".1"></path><path d="M4 20.5V7.7L12 4l8 3.7v12.8M2.5 20.5h19M8 10h1m-1 3h1m6-3h1m-1 3h1M10 20.5v-4.8h4v4.8"></path><path d="M8 10h1m-1 3h1m6-3h1m-1 3h1" stroke-width="2.4"></path></svg></span>
+        <span><small>All locations</small><strong>{{ restaurant_total }}</strong></span>
+    </article>
+    <article class="restaurants-v2-stat stat-open">
+        <span class="restaurants-v2-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h15M7 20V4.5l10-2V20" fill="currentColor" fill-opacity=".1"></path><path d="M5 20h15M7 20V4.5l10-2V20m-5-9.5h.01" stroke-width="1.9"></path><path d="M10 4.1v15.3m4-16v16.2" stroke-opacity=".5"></path></svg></span>
+        <span><small>Open now</small><strong>{{ open_restaurants }}</strong></span>
+    </article>
+    <article class="restaurants-v2-stat stat-orders">
+        <span class="restaurants-v2-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17Z" fill="currentColor" fill-opacity=".12"></path><path d="M6 3.5h12v17l-2.5-1.7-3.5 1.7-3.5-1.7L6 20.5v-17ZM9 8h6M9 12h6M9 16h3"></path><path d="M15 3.5v4h3" fill="currentColor" fill-opacity=".2"></path></svg></span>
+        <span><small>Total orders</small><strong>{{ restaurant_order_total }}</strong></span>
+    </article>
+    <article class="restaurants-v2-stat stat-revenue">
+        <span class="restaurants-v2-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="5.5" fill="currentColor" fill-opacity=".12"></circle><circle cx="9" cy="8" r="5.5"></circle><path d="M11 5.7c-.4-.4-.9-.6-1.7-.6-1 0-1.6.5-1.6 1.2s.6 1 1.6 1.3 1.6.6 1.6 1.3-.6 1.3-1.6 1.3c-.8 0-1.4-.2-1.8-.7M9.3 4.4v6.4"></path><circle cx="16.5" cy="15.5" r="5" fill="currentColor" fill-opacity=".13"></circle><circle cx="16.5" cy="15.5" r="5"></circle><path d="M18.2 13.6c-.4-.3-.8-.5-1.5-.5-.8 0-1.4.4-1.4 1s.5.9 1.4 1.1 1.4.5 1.4 1.1-.5 1.1-1.4 1.1c-.7 0-1.2-.2-1.6-.6m1.6-4.2v5.2"></path></svg></span>
+        <span><small>Completed revenue</small><strong>UGX {{ restaurant_revenue|floatformat:"0" }}</strong></span>
+    </article>
+</section>
+
+<section class="restaurants-v2-directory">
+    <div class="restaurants-v2-toolbar">
+        <div>
+            <h2>Restaurant locations <span>{{ restaurants.count }}</span></h2>
+            <p>{% if search_query %}Showing matches for “{{ search_query }}”{% else %}A quick overview of every location{% endif %}</p>
         </div>
+        <form method="get" class="restaurants-v2-search">
+            <label>
+                <i class="bi bi-search"></i>
+                <input type="search" name="search" placeholder="Search a location" value="{{ search_query|default:'' }}" aria-label="Search restaurants by name or address">
+            </label>
+            {% if search_query %}<a class="restaurant-clear-search" href="{% url 'orders:restaurant_list' %}" aria-label="Clear search"><i class="bi bi-x-lg"></i></a>{% endif %}
+        </form>
     </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">No restaurants found</div>
+
+    <div class="restaurants-v2-grid">
+        {% for restaurant in restaurants %}
+        <article class="restaurant-property-card">
+            <a class="restaurant-property-art" href="{% url 'orders:menu_list' %}?restaurant={{ restaurant.restaurant_id }}" aria-label="View menu for {{ restaurant.name }}">
+                <span class="restaurant-art-building" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5.2 5h13.6L21 10H3l2.2-5Z" fill="currentColor" fill-opacity=".16"></path><path d="M5.2 5h13.6L21 10H3l2.2-5ZM4.5 10v10h15V10M9 20v-6h6v6M3 10a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"></path><path d="M7 7.5h10M7 10v2m4-2v2m4-2v2m-4 2h2v6h-2z" stroke-opacity=".7"></path></svg>
+                </span>
+                <span class="restaurant-property-status {% if restaurant.is_open %}is-open{% else %}is-closed{% endif %}">
+                    <i class="bi bi-circle-fill"></i>{% if restaurant.is_open %}Open{% else %}Closed{% endif %}
+                </span>
+                <span class="restaurant-art-id">{{ restaurant.restaurant_id }}</span>
+            </a>
+            <div class="restaurant-property-content">
+                <div class="restaurant-property-title">
+                    <div>
+                        <h3>{{ restaurant.name }}</h3>
+                        <p><i class="bi bi-geo-alt"></i>{{ restaurant.address }}</p>
+                    </div>
+                    <a href="{% url 'orders:menu_list' %}?restaurant={{ restaurant.restaurant_id }}" class="restaurant-open-menu" aria-label="Open menu for {{ restaurant.name }}" title="Open menu">
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                </div>
+                <div class="restaurant-property-metrics">
+                    <span><small>Orders</small><strong>{{ restaurant.order_count }}</strong></span>
+                    <span><small>Revenue</small><strong>{% if restaurant.total_revenue %}UGX {{ restaurant.total_revenue|floatformat:"0" }}{% else %}—{% endif %}</strong></span>
+                </div>
+                <a class="restaurant-property-link" href="{% url 'orders:menu_list' %}?restaurant={{ restaurant.restaurant_id }}">
+                    View restaurant menu <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+        {% empty %}
+        <div class="customers-empty restaurants-v2-empty">
+            <span><i class="bi bi-shop-window"></i></span>
+            <strong>{% if search_query %}No matching restaurants{% else %}No restaurants yet{% endif %}</strong>
+            <small>{% if search_query %}Try another restaurant name or address.{% else %}Add a restaurant to start managing locations and orders.{% endif %}</small>
+            {% if not search_query %}
+            <a href="{% url 'orders:restaurant_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add restaurant</a>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
+</section>
 {% endblock %}
