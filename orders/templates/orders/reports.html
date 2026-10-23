@@ -1,0 +1,112 @@
+{% extends 'orders/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i>Reports</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-3">Revenue per Restaurant</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="restaurantChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-3">Orders by Status</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-3">Best-Selling Menu Items</h5>
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr><th>Item</th><th>Restaurant</th><th class="text-end">Qty Sold</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in best_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.restaurant.name }}</td>
+                        <td class="text-end fw-semibold">{{ item.qty }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No sales yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <h5 class="fw-semibold mb-3">Rider Performance</h5>
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr><th>Rider</th><th class="text-end">Assigned</th><th class="text-end">Delivered</th></tr>
+                </thead>
+                <tbody>
+                    {% for rider in riders %}
+                    <tr>
+                        <td>{{ rider.name }}</td>
+                        <td class="text-end">{{ rider.total }}</td>
+                        <td class="text-end fw-semibold">{{ rider.delivered }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No riders.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{ restaurant_chart|json_script:"restaurant-data" }}
+{{ status_chart|json_script:"status-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    const rd = JSON.parse(document.getElementById('restaurant-data').textContent);
+    const sd = JSON.parse(document.getElementById('status-data').textContent);
+
+    new Chart(document.getElementById('restaurantChart'), {
+        type: 'bar',
+        data: {
+            labels: rd.labels,
+            datasets: [{ label: 'Revenue (UGX)', data: rd.values, backgroundColor: '#4361ee', borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const statusColors = {
+        'Pending': '#ff9f1c',
+        'Preparing': '#4cc9f0',
+        'Completed': '#2ec4b6',
+        'Cancelled': '#e71d36'
+    };
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: sd.labels,
+            datasets: [{ data: sd.values, backgroundColor: sd.labels.map(l => statusColors[l]) }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

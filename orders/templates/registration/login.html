@@ -1,0 +1,31 @@
+{% extends 'orders/base.html' %}
+
+{% block title %}Sign in - OrderHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card mt-4">
+            <div class="card-header">Sign in</div>
+            <div class="card-body">
+                {% if form.errors %}
+                <div class="alert alert-danger">Wrong username or password.</div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" autofocus required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Log in</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

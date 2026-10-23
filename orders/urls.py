@@ -15,7 +15,7 @@ urlpatterns = [
     path('orders/<str:order_id>/delete/', views.order_delete, name='order_delete'),
     
     # Order Items (For adding/removing items from an order)
-    path('order-items/<int:pk>/delete/', views.orderitem_delete, name='orderitem_delete'), # <-- NEW
+    path('order-items/<int:pk>/delete/', views.orderitem_delete, name='orderitem_delete'),
     
     # Customers
     path('customers/', views.customer_list, name='customer_list'),
@@ -34,4 +34,7 @@ urlpatterns = [
     # Menu Items
     path('menu/', views.menu_list, name='menu_list'),
     path('menu/create/', views.menu_item_create, name='menu_item_create'),
+
+    # Reports (staff only)
+    path('reports/', views.reports, name='reports'),
 ]
