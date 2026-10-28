@@ -64,46 +64,46 @@ class OrderForm(forms.ModelForm):
         widget=forms.EmailInput(attrs={'class': 'form-control'})
     )
 
+    # Logistics fields: shown only when editing an existing order
+    ADMIN_FIELDS = ['rider', 'status', 'delivery_status', 'payment_status']
+
     class Meta:
         model = Order
-        # Exclude all admin fields for now (they will be added back on Edit)
-        exclude = [
-            'order_id', 'placed_at', 'customer', 'total', 
-            'rider', 'status', 'delivery_status', 'payment_status'
-        ]
+        # These are real form fields now, so Django pre-fills them from the
+        # saved order and saves changes to them. They are removed in __init__
+        # when creating a new order.
+        exclude = ['order_id', 'placed_at', 'customer', 'total']
         widgets = {
             'restaurant': forms.Select(attrs={'class': 'form-control'}),
             'delivery_address': forms.TextInput(attrs={'class': 'form-control'}),
+            'rider': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'delivery_status': forms.Select(attrs={'class': 'form-control'}),
+            'payment_status': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # If editing an EXISTING order, add the admin fields back in
+
         if self.instance and self.instance.pk:
-            # Pre-fill customer info
+            # EDITING: pre-fill the customer details
             self.fields['customer_name'].initial = self.instance.customer.customer_name
             self.fields['phone_contact'].initial = self.instance.customer.phone_contact
             self.fields['email_address'].initial = self.instance.customer.email_address
-            
-            # Add Admin fields for logistics management
-            self.fields['rider'] = forms.ModelChoiceField(
-                queryset=DeliveryRider.objects.all(), 
-                required=False, 
-                widget=forms.Select(attrs={'class': 'form-control'})
-            )
-            self.fields['status'] = forms.ChoiceField(
-                choices=Order.ORDER_STATUS, 
-                widget=forms.Select(attrs={'class': 'form-control'})
-            )
-            self.fields['delivery_status'] = forms.ChoiceField(
-                choices=Order.DELIVERY_STATUS, 
-                widget=forms.Select(attrs={'class': 'form-control'})
-            )
-            self.fields['payment_status'] = forms.ChoiceField(
-                choices=Order.PAYMENT_STATUS, 
-                widget=forms.Select(attrs={'class': 'form-control'})
-            )
+
+            # A rider is optional (assigned after the order is placed)
+            self.fields['rider'].required = False
+
+            # Keep the original field order on the page
+            self.order_fields([
+                'restaurant', 'delivery_address',
+                'customer_name', 'phone_contact', 'email_address',
+                'rider', 'status', 'delivery_status', 'payment_status',
+            ])
+        else:
+            # CREATING: hide the logistics fields; model defaults apply
+            for name in self.ADMIN_FIELDS:
+                self.fields.pop(name, None)
 
 class OrderItemForm(forms.ModelForm):
     class Meta:
