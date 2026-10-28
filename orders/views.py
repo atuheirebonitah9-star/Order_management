@@ -257,7 +257,7 @@ def customer_create(request):
             return redirect('orders:customer_list')
     else:
         form = CustomerForm()
-    return render(request, 'orders/customer_form.html', {'form': form, 'title': 'Add Customer'})
+    return render(request, 'orders/entity_form.html', {'form': form, 'title': 'Add Customer'})
 
 def customer_update(request, pk):
     customer = get_object_or_404(Customer, customer_id=pk)
@@ -269,7 +269,7 @@ def customer_update(request, pk):
             return redirect('orders:customer_list')
     else:
         form = CustomerForm(instance=customer)
-    return render(request, 'orders/customer_form.html', {'form': form, 'title': 'Edit Customer'})
+    return render(request, 'orders/entity_form.html', {'form': form, 'title': 'Edit Customer'})
 
 def customer_delete(request, pk):
     customer = get_object_or_404(Customer, customer_id=pk)
@@ -319,7 +319,7 @@ def restaurant_create(request):
             return redirect('orders:restaurant_list')
     else:
         form = RestaurantForm()
-    return render(request, 'orders/restaurant_form.html', {'form': form, 'title': 'Add Restaurant'})
+    return render(request, 'orders/entity_form.html', {'form': form, 'title': 'Add Restaurant'})
 
 def rider_list(request):
     riders = DeliveryRider.objects.annotate(
@@ -357,7 +357,7 @@ def rider_create(request):
             return redirect('orders:rider_list')
     else:
         form = DeliveryRiderForm()
-    return render(request, 'orders/rider_form.html', {'form': form, 'title': 'Add Rider'})
+    return render(request, 'orders/entity_form.html', {'form': form, 'title': 'Add Rider'})
 
 def menu_list(request):
     menu_items = MenuItem.objects.select_related('restaurant').annotate(
@@ -430,7 +430,7 @@ def menu_item_create(request):
             return redirect('orders:menu_list')
     else:
         form = MenuItemForm()
-    return render(request, 'orders/menu_item_form.html', {'form': form, 'title': 'Add Menu Item'})
+    return render(request, 'orders/entity_form.html', {'form': form, 'title': 'Add Menu Item'})
 
 
 # ==========================================
